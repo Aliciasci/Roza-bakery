@@ -6,8 +6,10 @@ import type { SitePhotos, Tone } from "@/lib/types";
 import { Card, ImageInput, PageTitle, SaveBar, TextInput, useEditor } from "./ui";
 
 const slots: {
-  key: "heroImage" | "aboutImage";
-  altKey: "heroImageAlt" | "aboutImageAlt";
+  key: "heroImage" | "stepsImage" | "aboutImage";
+  altKey: "heroImageAlt" | "stepsImageAlt" | "aboutImageAlt";
+  shape: string;
+  placeholder: string;
   title: string;
   where: string;
   href: string;
@@ -22,8 +24,22 @@ const slots: {
     where: "Grande photo en arche, en haut de la page d'accueil.",
     href: "/",
     tone: "rose",
+    shape: "aspect-[4/5] arch",
+    placeholder: "Aucune photo",
     defaultAlt: "Gâteau signature Roza Bakery",
     advice: "Format vertical conseillé (4:5), au moins 1200 px de haut. Le gâteau bien centré : le haut de l'arche est arrondi.",
+  },
+  {
+    key: "stepsImage",
+    altKey: "stepsImageAlt",
+    title: "Encadré « couche par couche »",
+    where: "Accueil, section « Créez-le à votre image ». Sans photo, la coupe de gâteau dessinée est affichée.",
+    href: "/#create-title",
+    tone: "cream",
+    shape: "aspect-[4/5] rounded-[1.5rem]",
+    placeholder: "Illustration dessinée",
+    defaultAlt: "Coupe d'un gâteau Roza Bakery",
+    advice: "Format vertical conseillé (4:5) — idéalement une part ou une coupe qui montre les couches. « Retirer » remet l'illustration dessinée.",
   },
   {
     key: "aboutImage",
@@ -32,6 +48,8 @@ const slots: {
     where: "Photo en arche à côté de « Notre histoire ».",
     href: "/a-propos",
     tone: "sage",
+    shape: "aspect-[4/5] arch",
+    placeholder: "Aucune photo",
     defaultAlt: "Portrait de la pâtissière de Roza Bakery",
     advice: "Format vertical conseillé (4:5).",
   },
@@ -46,7 +64,7 @@ export function PhotosEditor({ initial }: { initial: SitePhotos }) {
     <>
       <PageTitle title="Photos du site" intro="Les grandes photos des pages. Les photos des créations et des options se gèrent dans leurs sections." />
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-3">
         {slots.map((slot) => (
           <Card key={slot.key}>
             <div className="flex items-start justify-between gap-4">
@@ -64,9 +82,9 @@ export function PhotosEditor({ initial }: { initial: SitePhotos }) {
                 src={photos[slot.key]}
                 alt={photos[slot.altKey] || slot.defaultAlt}
                 tone={slot.tone}
-                shape="aspect-[4/5] arch"
+                shape={slot.shape}
                 sizes="256px"
-                placeholderLabel="Aucune photo"
+                placeholderLabel={slot.placeholder}
               />
             </div>
 

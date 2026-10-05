@@ -100,6 +100,8 @@ export const faqSchema = z.array(
 export const photosSchema = z.object({
   heroImage: image,
   heroImageAlt: optionalText(160),
+  stepsImage: image,
+  stepsImageAlt: optionalText(160),
   aboutImage: image,
   aboutImageAlt: optionalText(160),
 });

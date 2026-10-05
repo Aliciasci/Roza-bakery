@@ -14,7 +14,7 @@ export default async function HomePage() {
     <>
       <JsonLd data={bakeryJsonLd(site)} />
       <Hero image={photos.heroImage} imageAlt={photos.heroImageAlt} />
-      <CreateSteps />
+      <CreateSteps image={photos.stepsImage} imageAlt={photos.stepsImageAlt} />
       <CreationsPreview />
       <HowItWorks items={howItWorksShort} className="bg-rose-soft/60" />
       <KeyInfo />

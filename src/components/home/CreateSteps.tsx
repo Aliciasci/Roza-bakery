@@ -1,5 +1,6 @@
 import { CakeCrossSection, type CakeTones } from "@/components/configurator/CakeCrossSection";
 import { ButtonLink } from "@/components/ui/Button";
+import { CakeImage } from "@/components/ui/CakeImage";
 import { Reveal } from "@/components/ui/Reveal";
 import { creationSteps } from "@/content/process";
 
@@ -14,7 +15,7 @@ const demoTones: CakeTones = {
   decoration: true,
 };
 
-export function CreateSteps() {
+export function CreateSteps({ image, imageAlt }: { image?: string; imageAlt?: string }) {
   return (
     <section className="bg-ivory py-24 md:py-32" aria-labelledby="create-title">
       <div className="container-page grid gap-14 lg:grid-cols-12 lg:gap-10">
@@ -30,8 +31,17 @@ export function CreateSteps() {
             <p className="mt-5 max-w-md text-[1.0625rem] leading-relaxed text-cocoa">
               Sept étapes pour composer un gâteau qui vous ressemble, de la première couche à la dernière fleur.
             </p>
-            <div className="relative mt-10 max-w-sm rounded-[2rem] bg-cream p-6">
-              <CakeCrossSection tones={demoTones} className="w-full" />
+            <div className={`relative mt-10 max-w-sm rounded-[2rem] bg-cream ${image ? "p-3" : "p-6"}`}>
+              {image ? (
+                <CakeImage
+                  src={image}
+                  alt={imageAlt || "Coupe d'un gâteau Roza Bakery"}
+                  shape="aspect-[4/5] rounded-[1.5rem]"
+                  sizes="(min-width: 1024px) 24rem, 92vw"
+                />
+              ) : (
+                <CakeCrossSection tones={demoTones} className="w-full" />
+              )}
               <p className="script absolute -top-5 right-6 text-3xl text-rose-deep">couche par couche</p>
             </div>
             <ButtonLink href="/composer" size="lg" arrow className="mt-10 max-lg:!hidden">

@@ -208,6 +208,9 @@ export interface SitePhotos {
   /** Grande photo de la page d'accueil. */
   heroImage?: string;
   heroImageAlt?: string;
+  /** Encadré « couche par couche » de l'accueil (remplace la coupe dessinée). */
+  stepsImage?: string;
+  stepsImageAlt?: string;
   /** Portrait de la page À propos. */
   aboutImage?: string;
   aboutImageAlt?: string;
