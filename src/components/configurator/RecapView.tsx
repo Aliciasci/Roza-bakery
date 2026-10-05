@@ -1,0 +1,155 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Button, ButtonLink } from "@/components/ui/Button";
+import { resolveComposition } from "@/lib/composition";
+import { validateComposition, validateCustomer } from "@/lib/validation";
+import { computeCakeTones } from "./CakeCrossSection";
+import { LAST_ORDER_KEY, useConfigurator } from "./ConfiguratorProvider";
+import { OrderRecap } from "./OrderRecap";
+import { useObjectUrls } from "./useObjectUrls";
+
+export interface LastOrder {
+  reference: string;
+  draft: ReturnType<typeof useConfigurator>["draft"];
+  customer: ReturnType<typeof useConfigurator>["customer"];
+  photoCount: number;
+}
+
+export function RecapView() {
+  const router = useRouter();
+  const { steps, draft, customer, site, photos, hydrated } = useConfigurator();
+  const [status, setStatus] = useState<"idle" | "sending" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [honeypot, setHoneypot] = useState("");
+
+  const photoUrls = useObjectUrls(photos);
+
+  if (!hydrated) return <div className="container-page min-h-[70vh]" aria-busy="true" />;
+
+  const compositionError = validateComposition(steps, draft);
+  const customerErrors = validateCustomer(customer, site);
+  const firstIncompleteStep = steps.findIndex((s) => s.required && !(draft.selections[s.id]?.length ?? 0));
+
+  if (compositionError || Object.keys(customerErrors).length) {
+    const target = firstIncompleteStep >= 0 ? firstIncompleteStep + 1 : steps.length + 1;
+    return (
+      <div className="container-page flex min-h-[70vh] flex-col items-center justify-center py-20 text-center">
+        <p className="script text-4xl text-rose-deep">presque…</p>
+        <h1 className="mt-3 max-w-xl text-headline">Votre création n&apos;est pas encore complète</h1>
+        <p className="mt-5 max-w-md text-cocoa">
+          {compositionError ?? Object.values(customerErrors)[0]} Reprenez votre composition pour finaliser votre demande.
+        </p>
+        <ButtonLink href={`/composer?etape=${target}`} size="lg" arrow className="mt-9">
+          Reprendre ma création
+        </ButtonLink>
+      </div>
+    );
+  }
+
+  const composition = resolveComposition(steps, draft);
+  const slotLabel = site.pickupSlots.find((s) => s.id === customer.pickupSlot)?.label;
+
+  async function submit() {
+    setStatus("sending");
+    setErrorMessage("");
+    try {
+      const body = new FormData();
+      body.append("payload", JSON.stringify({ ...draft, customer }));
+      body.append("website", honeypot);
+      photos.forEach((file) => body.append("photos", file, file.name));
+
+      const res = await fetch("/api/commande", { method: "POST", body });
+      const data = (await res.json().catch(() => ({}))) as { reference?: string; error?: string };
+      if (!res.ok || !data.reference) throw new Error(data.error ?? "Une erreur est survenue.");
+
+      const lastOrder: LastOrder = { reference: data.reference, draft, customer, photoCount: photos.length };
+      try {
+        sessionStorage.setItem(LAST_ORDER_KEY, JSON.stringify(lastOrder));
+      } catch {
+        /* ignore */
+      }
+      router.push("/composer/confirmation");
+    } catch (err) {
+      setStatus("error");
+      setErrorMessage(
+        err instanceof Error && err.message !== "Failed to fetch"
+          ? err.message
+          : "Impossible d'envoyer votre demande pour le moment. Vérifiez votre connexion et réessayez.",
+      );
+    }
+  }
+
+  const sending = status === "sending";
+
+  return (
+    <div className="pb-36 lg:pb-0">
+      <section className="container-page pb-12 pt-6 md:pt-12">
+        <Link href={`/composer?etape=${steps.length + 1}`} className="inline-flex min-h-11 items-center text-sm text-cocoa hover:text-chocolate">
+          ← Retour à ma création
+        </Link>
+        <div className="mt-6 max-w-3xl animate-fade-up">
+          <p className="eyebrow">Récapitulatif</p>
+          <h1 className="mt-4 text-display">
+            Votre création, <em className="text-cocoa">en un regard</em>
+          </h1>
+          <p className="mt-6 max-w-xl text-[1.0625rem] leading-relaxed text-cocoa">
+            Vérifiez chaque détail avant d&apos;envoyer votre demande. Rien n&apos;est encore commandé : Roza Bakery étudiera
+            votre création puis reviendra vers vous.
+          </p>
+        </div>
+      </section>
+
+      <section className="container-page animate-fade-up [animation-delay:120ms]">
+        <OrderRecap
+          composition={composition}
+          tones={computeCakeTones(steps, draft)}
+          customer={customer}
+          slotLabel={slotLabel}
+          photoUrls={photoUrls}
+          editable
+        />
+      </section>
+
+      <section className="container-page py-16 text-center md:py-24">
+        <p className="mx-auto max-w-lg text-[1.0625rem] leading-relaxed text-cocoa">
+          Le prix de votre création sera confirmé par Roza Bakery après étude de votre demande.
+          <span className="mt-1 block text-sm">Aucun paiement n&apos;est demandé en ligne.</span>
+        </p>
+
+        {/* Champ anti-spam invisible */}
+        <div aria-hidden className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+          <label>
+            Ne pas remplir
+            <input tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
+          </label>
+        </div>
+
+        <div aria-live="assertive">
+          {status === "error" && (
+            <p role="alert" className="mx-auto mt-6 max-w-md rounded-2xl bg-berry/10 p-4 text-sm text-berry">
+              {errorMessage}
+            </p>
+          )}
+        </div>
+
+        <Button size="lg" arrow onClick={submit} disabled={sending} className="mt-8 min-w-72 max-lg:!hidden">
+          {sending ? "Envoi en cours…" : "Demander mon gâteau"}
+        </Button>
+        <p className="mx-auto mt-6 max-w-md text-xs leading-relaxed text-cocoa-light">
+          Vos informations sont utilisées uniquement pour traiter votre demande et vous recontacter.
+        </p>
+      </section>
+
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-chocolate/10 bg-cream/95 pb-safe backdrop-blur-md lg:hidden">
+        <div className="container-page pt-3">
+          <Button size="lg" arrow onClick={submit} disabled={sending} className="w-full">
+            {sending ? "Envoi en cours…" : "Demander mon gâteau"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

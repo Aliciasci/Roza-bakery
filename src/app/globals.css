@@ -1,0 +1,249 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Roza Bakery — Design tokens
+   ========================================================================== */
+
+@theme {
+  /* Palette */
+  --color-cream: #fbf7f1;
+  --color-ivory: #f4ede3;
+  --color-sand: #e7d8c5;
+  --color-sand-deep: #d6c1a8;
+  --color-chocolate: #3a2520;
+  --color-cocoa: #6a4f45;
+  --color-cocoa-light: #8c7268;
+  --color-rose: #ebcfc8;
+  --color-rose-soft: #f5e6e1;
+  --color-rose-deep: #b9776d;
+  --color-sage: #a7b39a;
+  --color-sage-soft: #e3e8dc;
+  --color-sage-deep: #5f6e55;
+  --color-berry: #9e2f45;
+  --color-paper: #fffdf9;
+
+  /* Typographies (variables injectées par next/font) */
+  --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-sans: var(--font-manrope), "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-script: var(--font-parisienne), "Parisienne", cursive;
+
+  /* Échelle éditoriale */
+  --text-display: clamp(2.75rem, 1.6rem + 5.6vw, 6rem);
+  --text-display--line-height: 0.98;
+  --text-display--letter-spacing: -0.02em;
+  --text-headline: clamp(2.1rem, 1.5rem + 2.8vw, 3.75rem);
+  --text-headline--line-height: 1.04;
+  --text-headline--letter-spacing: -0.015em;
+  --text-title: clamp(1.6rem, 1.3rem + 1.2vw, 2.25rem);
+  --text-title--line-height: 1.1;
+
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+
+  --animate-step-in-next: step-in-next 0.45s var(--ease-soft) both;
+  --animate-step-in-prev: step-in-prev 0.45s var(--ease-soft) both;
+  --animate-fade-up: fade-up 0.6s var(--ease-soft) both;
+  --animate-pop: pop 0.32s var(--ease-soft) both;
+  --animate-sheet-in: sheet-in 0.38s var(--ease-soft) both;
+  --animate-fade-in: fade-in 0.3s ease both;
+
+  @keyframes step-in-next {
+    from { opacity: 0; transform: translate3d(18px, 0, 0); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes step-in-prev {
+    from { opacity: 0; transform: translate3d(-18px, 0, 0); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translate3d(0, 14px, 0); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes pop {
+    0% { transform: scale(0.4); opacity: 0; }
+    60% { transform: scale(1.12); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+  @keyframes sheet-in {
+    from { transform: translate3d(0, 100%, 0); }
+    to { transform: none; }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--color-cream);
+    color: var(--color-chocolate);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  ::selection {
+    background: var(--color-rose);
+    color: var(--color-chocolate);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-berry);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Évite le zoom automatique de Safari iOS sur les champs */
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ==========================================================================
+   Composants utilitaires
+   ========================================================================== */
+
+@layer components {
+  .container-page {
+    width: 100%;
+    max-width: 82rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 768px) {
+    .container-page {
+      padding-inline: 2.5rem;
+    }
+  }
+
+  /* Surtitre en petites capitales espacées */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-cocoa);
+  }
+
+  .script {
+    font-family: var(--font-script);
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  /* Filet fin éditorial */
+  .rule {
+    height: 1px;
+    background: color-mix(in srgb, var(--color-chocolate) 14%, transparent);
+  }
+
+  /* Texte de remplacement clairement identifié (information manquante) */
+  .placeholder-text {
+    background: color-mix(in srgb, var(--color-rose) 45%, transparent);
+    border-bottom: 1px dashed var(--color-rose-deep);
+    padding: 0 0.25em;
+    border-radius: 2px;
+    font-style: normal;
+  }
+
+  /* Champs de formulaire */
+  .field {
+    width: 100%;
+    min-height: 3.25rem;
+    border-radius: 0.875rem;
+    border: 1px solid color-mix(in srgb, var(--color-chocolate) 16%, transparent);
+    background: var(--color-paper);
+    padding: 0.85rem 1rem;
+    color: var(--color-chocolate);
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .field::placeholder {
+    color: var(--color-cocoa-light);
+  }
+  .field:hover {
+    border-color: color-mix(in srgb, var(--color-chocolate) 30%, transparent);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-chocolate);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-rose) 55%, transparent);
+  }
+  .field[aria-invalid="true"] {
+    border-color: var(--color-berry);
+  }
+
+  /* Apparition progressive (uniquement si JS actif) */
+  @media (scripting: enabled) {
+    [data-reveal] {
+      opacity: 0;
+      transform: translate3d(0, 18px, 0);
+      transition:
+        opacity 0.8s var(--ease-soft),
+        transform 0.8s var(--ease-soft);
+      transition-delay: var(--reveal-delay, 0ms);
+    }
+    [data-reveal].is-visible {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Arche — motif signature (vitrine de pâtisserie) */
+  .arch {
+    border-radius: 999px 999px 1.25rem 1.25rem;
+  }
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
