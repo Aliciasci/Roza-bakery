@@ -52,7 +52,7 @@ Chaque `git push` sur `main` redéploie automatiquement. Le volume, lui, est con
 | **Tableau de bord** | Nouvelles demandes, retraits des 14 prochains jours, raccourcis |
 | **Commandes** | Liste filtrable par statut, triable par date de retrait. Dans chaque fiche : composition, photos d'inspiration, contact (email / téléphone), statut, **prix confirmé**, notes internes |
 | **Configurateur** | Pour chacune des 9 étapes : textes, choix unique ou multiple, étape obligatoire ou non. Ajouter, renommer, réordonner ou supprimer des **options** (crèmes, inserts, fruits…) et des groupes. Couleur (teinte ou couleur sur mesure), photo, option « champ libre », option **non disponible** (masquée sans la supprimer) |
-| **Photos du site** | Grande photo de l'accueil, encadré « couche par couche » (remplace l'illustration dessinée), portrait de la page À propos, avec leur description |
+| **Photos du site** | Grande photo de l'accueil, portrait de la page À propos, avec leur description |
 | **Créations** | Galerie : photo, nom, description, catégories, format, ordre, badge « Exemple ». Gestion des catégories (filtres) |
 | **FAQ** | Questions et réponses, ordre, réponses « à compléter » |
 | **Boutique** | Coordonnées, Instagram, horaires, délais (minimum / conseillé), jours fermés, **dates indisponibles** (congés), créneaux de retrait, nombre maximum de photos |

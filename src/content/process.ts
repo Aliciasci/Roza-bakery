@@ -1,15 +1,5 @@
 /** Textes éditoriaux réutilisés sur plusieurs pages. */
 
-export const creationSteps = [
-  { title: "Choisissez votre base", text: "Génoise classique, molly cake ou dacquoise." },
-  { title: "Choisissez votre crème", text: "Ganache montée, chantilly, crème pâtissière…" },
-  { title: "Ajoutez vos inserts", text: "Un cœur fruité ou crémeux, en surprise." },
-  { title: "Ajoutez du croustillant", text: "Fruits secs, chocolat, pistache…" },
-  { title: "Choisissez vos fruits", text: "Fruits rouges, mangue, fruits de saison…" },
-  { title: "Personnalisez les suppléments", text: "La touche gourmande en plus." },
-  { title: "Choisissez la finition", text: "Crème au beurre ou ganache, puis la décoration." },
-];
-
 export const howItWorksShort = [
   { title: "Je compose", text: "Je choisis chaque élément de mon gâteau, de la génoise à la décoration." },
   { title: "J'envoie ma demande", text: "J'indique ma date de retrait, mes coordonnées et mes inspirations." },
