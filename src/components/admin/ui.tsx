@@ -10,17 +10,47 @@ import type { ActionResult } from "@/app/admin/actions";
 /* Édition avec enregistrement                                                 */
 /* -------------------------------------------------------------------------- */
 
+type EditorStatus = "idle" | "saving" | "saved" | "error" | "restored";
+
+const draftKey = () => `roza:admin-draft:${window.location.pathname}`;
+
+/**
+ * Après un nouveau déploiement, une page restée ouverte appelle une action serveur
+ * qui n'existe plus (« Server Action … was not found »). On le détecte pour recharger
+ * la page sans perdre la saisie.
+ */
+function isStaleDeploymentError(e: unknown) {
+  const text = e instanceof Error ? `${e.name} ${e.message}` : String(e);
+  return /UnrecognizedActionError|Server Action .* was not found|Failed to find Server Action/i.test(text);
+}
+
 /** État local d'un éditeur + suivi des modifications + enregistrement via action serveur. */
 export function useEditor<T>(initial: T, action: (value: T) => Promise<ActionResult>) {
   const [value, setValue] = useState(initial);
   const [saved, setSaved] = useState(() => JSON.stringify(initial));
-  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [status, setStatus] = useState<EditorStatus>("idle");
   const [error, setError] = useState("");
+  const reloading = useRef(false);
   const dirty = JSON.stringify(value) !== saved;
+
+  // Restaure une saisie conservée lors d'un rechargement automatique
+  useEffect(() => {
+    try {
+      const draft = sessionStorage.getItem(draftKey());
+      if (!draft) return;
+      sessionStorage.removeItem(draftKey());
+      setValue(JSON.parse(draft) as T);
+      setStatus("restored");
+    } catch {
+      /* stockage indisponible */
+    }
+  }, []);
 
   useEffect(() => {
     if (!dirty) return;
-    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    const warn = (e: BeforeUnloadEvent) => {
+      if (!reloading.current) e.preventDefault();
+    };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
@@ -28,7 +58,23 @@ export function useEditor<T>(initial: T, action: (value: T) => Promise<ActionRes
   async function save() {
     setStatus("saving");
     setError("");
-    const result = await action(value).catch((e: unknown) => ({ ok: false as const, error: String(e) }));
+    let result: ActionResult;
+    try {
+      result = await action(value);
+    } catch (e) {
+      if (isStaleDeploymentError(e)) {
+        try {
+          sessionStorage.setItem(draftKey(), JSON.stringify(value));
+          reloading.current = true;
+          window.location.reload();
+          return;
+        } catch {
+          result = { ok: false, error: "Le site vient d'être mis à jour : rechargez la page puis recommencez." };
+        }
+      } else {
+        result = { ok: false, error: e instanceof Error ? e.message : String(e) };
+      }
+    }
     if (result.ok) {
       setSaved(JSON.stringify(value));
       setStatus("saved");
@@ -56,7 +102,7 @@ export function SaveBar({
   onReset,
 }: {
   dirty: boolean;
-  status: "idle" | "saving" | "saved" | "error";
+  status: EditorStatus;
   error: string;
   onSave: () => void;
   onReset: () => void;
@@ -73,6 +119,8 @@ export function SaveBar({
         <p className="min-w-0 flex-1 text-sm">
           {status === "error" ? (
             <span className="text-rose">{error}</span>
+          ) : status === "restored" && dirty ? (
+            "Le site a été mis à jour pendant votre saisie — vos modifications sont conservées, enregistrez-les."
           ) : status === "saved" && !dirty ? (
             <span className="inline-flex items-center gap-2">
               <CheckIcon className="h-4 w-4" /> Enregistré — le site est à jour
