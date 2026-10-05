@@ -27,11 +27,12 @@ npm run build && npm start   # production
 1. **New Project → Deploy from GitHub repo**, puis choisir `Roza-bakery`. Le build et le démarrage sont configurés dans `railway.json`.
 2. **Volume** (indispensable) : dans le service, *Settings → Volumes → Add Volume*, chemin de montage `/data`.
    Sans volume, les commandes, les photos et les modifications de l'admin sont **effacées à chaque déploiement**.
+   L'admin affiche une alerte rouge tant que les données ne sont pas sur un volume.
 3. **Variables** (*Variables*) :
 
    | Variable | Valeur |
    | --- | --- |
-   | `DATA_DIR` | `/data` |
+   | `DATA_DIR` | facultatif : le volume Railway est détecté automatiquement. Si vous la définissez, elle doit être **identique** au chemin du volume |
    | `ADMIN_PASSWORD` | un mot de passe solide |
    | `NEXT_PUBLIC_SITE_URL` | l'URL publique, ex. `https://roza-bakery.up.railway.app` |
    | `RESEND_API_KEY`, `EMAIL_FROM`, `BAKERY_NOTIFICATION_EMAIL` | facultatif : envoi des emails |
