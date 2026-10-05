@@ -2,6 +2,9 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { MobileComposeCTA } from "@/components/layout/MobileComposeCTA";
 
+// Le contenu est lu à chaque requête (il est modifiable depuis l'admin et stocké sur le volume de données)
+export const dynamic = "force-dynamic";
+
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <>

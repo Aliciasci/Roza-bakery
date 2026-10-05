@@ -6,6 +6,7 @@ import { creationCategories, creations } from "@/content/creations";
 import { faq } from "@/content/faq";
 import { site } from "@/content/site";
 import type { SiteContent } from "@/lib/types";
+import { DATA_DIR } from "@/server/data-dir";
 
 /**
  * Stockage du contenu modifiable depuis l'admin.
@@ -17,7 +18,7 @@ import type { SiteContent } from "@/lib/types";
  * par une base de données (Postgres, Supabase, Vercel KV…). Le reste du site ne change pas.
  */
 
-const FILE = path.join(process.cwd(), "data", "content.json");
+const FILE = path.join(DATA_DIR, "content.json");
 
 export const defaultContent: SiteContent = {
   site,

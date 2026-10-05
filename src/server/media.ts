@@ -2,6 +2,7 @@ import "server-only";
 import { randomBytes } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { DATA_DIR } from "./data-dir";
 
 /**
  * Photos publiques gérées depuis l'admin (options, créations).
@@ -9,7 +10,7 @@ import path from "node:path";
  * Pour un hébergement serverless, remplacer par un stockage objet (S3, Vercel Blob…).
  */
 
-const MEDIA_DIR = path.join(process.cwd(), "data", "media");
+const MEDIA_DIR = path.join(DATA_DIR, "media");
 
 export const MEDIA_TYPES: Record<string, string> = {
   "image/jpeg": "jpg",

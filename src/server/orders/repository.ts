@@ -2,6 +2,7 @@ import "server-only";
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { Order } from "@/lib/types";
+import { DATA_DIR } from "@/server/data-dir";
 
 export type OrderPatch = Partial<Pick<Order, "status" | "confirmedPrice" | "adminNotes">>;
 
@@ -32,7 +33,6 @@ export interface OrderRepository {
   filePath(orderId: string, name: string): string | null;
 }
 
-const DATA_DIR = path.join(process.cwd(), "data");
 
 function safeName(name: string) {
   return name.normalize("NFKD").replace(/[^\w.-]+/g, "_").slice(-80) || "photo";

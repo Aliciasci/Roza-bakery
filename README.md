@@ -22,6 +22,25 @@ npm run build && npm start   # production
 - Le brouillon est sauvegardé dans le navigateur (`localStorage`). Les photos restent en mémoire.
 - Le bouton « retour » du téléphone recule d'une étape (`?etape=N`).
 
+## Déploiement sur Railway
+
+1. **New Project → Deploy from GitHub repo**, puis choisir `Roza-bakery`. Le build et le démarrage sont configurés dans `railway.json`.
+2. **Volume** (indispensable) : dans le service, *Settings → Volumes → Add Volume*, chemin de montage `/data`.
+   Sans volume, les commandes, les photos et les modifications de l'admin sont **effacées à chaque déploiement**.
+3. **Variables** (*Variables*) :
+
+   | Variable | Valeur |
+   | --- | --- |
+   | `DATA_DIR` | `/data` |
+   | `ADMIN_PASSWORD` | un mot de passe solide |
+   | `NEXT_PUBLIC_SITE_URL` | l'URL publique, ex. `https://roza-bakery.up.railway.app` |
+   | `RESEND_API_KEY`, `EMAIL_FROM`, `BAKERY_NOTIFICATION_EMAIL` | facultatif : envoi des emails |
+
+4. **Domaine** : *Settings → Networking → Generate Domain*, ou ajouter un domaine personnalisé.
+   Si l'URL change, mettre à jour `NEXT_PUBLIC_SITE_URL` et redéployer.
+
+Chaque `git push` sur `main` redéploie automatiquement. Le volume, lui, est conservé d'un déploiement à l'autre.
+
 ## Administration — `/admin`
 
 1. Dans `.env.local`, définir `ADMIN_PASSWORD=un-mot-de-passe-solide`, puis redémarrer le serveur.
@@ -106,7 +125,8 @@ src/
 ### Commandes et notifications
 
 - **Stockage** : `FileOrderRepository` enregistre dans `data/orders/*.json` et `data/uploads/` (ignorés par git).
-  Il faut donc un hébergement **avec disque persistant** (VPS, Railway, Render avec disque, Docker…).
+  Il faut donc un hébergement **avec disque persistant** (volume Railway, VPS, Docker…).
+  Emplacement configurable avec `DATA_DIR`.
   Sur une plateforme serverless (Vercel), le disque n'est pas persistant. Il faut alors remplacer 3 modules,
   sans toucher au reste du site :
   - `OrderRepository` → Postgres / Supabase ;
