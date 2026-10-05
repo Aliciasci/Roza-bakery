@@ -41,6 +41,7 @@ export const site: SiteInfo = {
 
 /**
  * URL publique du site (SEO, sitemap, Open Graph).
+ * Ordre : NEXT_PUBLIC_SITE_URL, puis le domaine Railway.
  * Tolère une valeur sans protocole (« mon-site.up.railway.app » → https://…) et
  * retombe sur localhost si la valeur est invalide, pour ne jamais bloquer le build.
  */
@@ -56,4 +57,5 @@ function normalizeSiteUrl(raw: string | undefined): string {
   }
 }
 
-export const siteUrl = normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL);
+// Sur Railway, RAILWAY_PUBLIC_DOMAIN est fourni automatiquement : il sert de valeur de repli.
+export const siteUrl = normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL || process.env.RAILWAY_PUBLIC_DOMAIN);
