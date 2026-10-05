@@ -97,6 +97,13 @@ export const faqSchema = z.array(
   }),
 );
 
+export const photosSchema = z.object({
+  heroImage: image,
+  heroImageAlt: optionalText(160),
+  aboutImage: image,
+  aboutImageAlt: optionalText(160),
+});
+
 const nullableText = (max: number) =>
   z
     .string()

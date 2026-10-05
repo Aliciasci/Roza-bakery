@@ -3,7 +3,7 @@
  * Le contenu provient du stockage géré par l'admin (`src/server/content/store.ts`).
  */
 import "server-only";
-import type { CompositionStep, Creation, CreationCategoryInfo, FaqItem, SiteInfo } from "@/lib/types";
+import type { CompositionStep, Creation, CreationCategoryInfo, FaqItem, SiteInfo, SitePhotos } from "@/lib/types";
 import { getContent } from "@/server/content/store";
 
 export async function getSiteInfo(): Promise<SiteInfo> {
@@ -19,6 +19,10 @@ export async function getCompositionSteps(): Promise<CompositionStep[]> {
       .map((group) => ({ ...group, options: group.options.filter((option) => option.available !== false) }))
       .filter((group) => group.options.length > 0),
   }));
+}
+
+export async function getSitePhotos(): Promise<SitePhotos> {
+  return (await getContent()).photos;
 }
 
 export async function getCreations(): Promise<Creation[]> {

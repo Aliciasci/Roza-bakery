@@ -203,8 +203,19 @@ export interface Order {
 }
 
 /** Tout le contenu modifiable depuis l'admin. */
+/** Photos des pages (hors galerie et configurateur). */
+export interface SitePhotos {
+  /** Grande photo de la page d'accueil. */
+  heroImage?: string;
+  heroImageAlt?: string;
+  /** Portrait de la page À propos. */
+  aboutImage?: string;
+  aboutImageAlt?: string;
+}
+
 export interface SiteContent {
   site: SiteInfo;
+  photos: SitePhotos;
   steps: CompositionStep[];
   creations: Creation[];
   categories: CreationCategoryInfo[];

@@ -6,14 +6,14 @@ import { HowItWorks } from "@/components/home/HowItWorks";
 import { KeyInfo } from "@/components/home/KeyInfo";
 import { JsonLd, bakeryJsonLd } from "@/components/seo/JsonLd";
 import { howItWorksShort } from "@/content/process";
-import { getSiteInfo } from "@/lib/data";
+import { getSiteInfo, getSitePhotos } from "@/lib/data";
 
 export default async function HomePage() {
-  const site = await getSiteInfo();
+  const [site, photos] = await Promise.all([getSiteInfo(), getSitePhotos()]);
   return (
     <>
       <JsonLd data={bakeryJsonLd(site)} />
-      <Hero />
+      <Hero image={photos.heroImage} imageAlt={photos.heroImageAlt} />
       <CreateSteps />
       <CreationsPreview />
       <HowItWorks items={howItWorksShort} className="bg-rose-soft/60" />

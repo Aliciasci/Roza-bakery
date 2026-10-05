@@ -26,6 +26,7 @@ export const defaultContent: SiteContent = {
   creations,
   categories: creationCategories,
   faq,
+  photos: {},
 };
 
 async function readStored(): Promise<Partial<SiteContent>> {

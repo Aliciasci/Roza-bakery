@@ -4,6 +4,7 @@ import { CakeImage } from "@/components/ui/CakeImage";
 import { PageHero } from "@/components/ui/PageHero";
 import { Reveal } from "@/components/ui/Reveal";
 import { whyUs } from "@/content/process";
+import { getSitePhotos } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "À propos — pâtisserie artisanale",
@@ -15,7 +16,8 @@ export const metadata: Metadata = {
  * ⚠️ Les blocs marqués « placeholder-text » attendent les textes réels de Roza Bakery
  * (histoire, parcours, prénom, ville…). Aucune information n'a été inventée.
  */
-export default function AboutPage() {
+export default async function AboutPage() {
+  const photos = await getSitePhotos();
   return (
     <>
       <PageHero
@@ -31,7 +33,14 @@ export default function AboutPage() {
       <section className="container-page pb-24 md:pb-32">
         <div className="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
           <Reveal className="lg:col-span-5">
-            <CakeImage alt="Portrait de la pâtissière de Roza Bakery" tone="sage" shape="aspect-[4/5] arch" placeholderLabel="Portrait à venir" />
+            <CakeImage
+              src={photos.aboutImage}
+              alt={photos.aboutImageAlt || "Portrait de la pâtissière de Roza Bakery"}
+              tone="sage"
+              shape="aspect-[4/5] arch"
+              placeholderLabel="Portrait à venir"
+              sizes="(min-width: 1024px) 40vw, 92vw"
+            />
           </Reveal>
           <Reveal delay={100} className="lg:col-span-6 lg:col-start-7">
             <p className="script text-4xl text-rose-deep">notre histoire</p>

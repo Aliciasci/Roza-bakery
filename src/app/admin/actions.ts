@@ -4,10 +4,10 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import type { CompositionStep, Creation, CreationCategoryInfo, FaqItem, OrderStatus, SiteInfo } from "@/lib/types";
+import type { CompositionStep, Creation, CreationCategoryInfo, FaqItem, OrderStatus, SiteInfo, SitePhotos } from "@/lib/types";
 import { requireAdmin } from "@/server/auth";
 import { checkPassword, createSessionToken, adminConfigured, SESSION_COOKIE, SESSION_DURATION_S } from "@/server/auth/session";
-import { creationsSchema, faqSchema, siteSchema, stepsSchema } from "@/server/content/schema";
+import { creationsSchema, faqSchema, photosSchema, siteSchema, stepsSchema } from "@/server/content/schema";
 import { updateContent } from "@/server/content/store";
 import { getOrderRepository } from "@/server/orders/repository";
 
@@ -83,6 +83,12 @@ export async function saveCreations(data: { creations: Creation[]; categories: C
 export async function saveFaq(items: FaqItem[]) {
   return guarded(async () => {
     await updateContent("faq", faqSchema.parse(items));
+  });
+}
+
+export async function savePhotos(photos: SitePhotos) {
+  return guarded(async () => {
+    await updateContent("photos", photosSchema.parse(photos));
   });
 }
 

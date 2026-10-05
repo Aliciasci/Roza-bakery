@@ -21,7 +21,7 @@ function RotatingBadge() {
   );
 }
 
-export function Hero() {
+export function Hero({ image, imageAlt }: { image?: string; imageAlt?: string }) {
   return (
     <section className="relative overflow-hidden">
       {/* Halo discret */}
@@ -62,7 +62,8 @@ export function Hero() {
         <div className="relative animate-fade-up [animation-delay:200ms] lg:col-span-6">
           <div className="relative mx-auto max-w-[34rem] lg:ml-auto lg:mr-0">
             <CakeImage
-              alt="Gâteau signature Roza Bakery"
+              src={image}
+              alt={imageAlt || "Gâteau signature Roza Bakery"}
               tone="rose"
               shape="aspect-[4/5] arch"
               priority
