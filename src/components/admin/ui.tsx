@@ -237,6 +237,76 @@ export function Toggle({ label, checked, onChange, description }: { label: strin
 }
 
 /* -------------------------------------------------------------------------- */
+/* Liste de valeurs (saveurs…)                                                 */
+/* -------------------------------------------------------------------------- */
+
+export function TagsInput({
+  label,
+  values,
+  onChange,
+  placeholder,
+  hint,
+}: {
+  label: string;
+  values: string[];
+  onChange: (values: string[]) => void;
+  placeholder?: string;
+  hint?: string;
+}) {
+  const id = useId();
+  const [draft, setDraft] = useState("");
+
+  function add() {
+    const items = draft
+      .split(",")
+      .map((v) => v.trim())
+      .filter((v) => v && !values.some((x) => x.toLowerCase() === v.toLowerCase()));
+    if (items.length) onChange([...values, ...items]);
+    setDraft("");
+  }
+
+  return (
+    <div>
+      <label htmlFor={id} className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-cocoa">
+        {label}
+      </label>
+      <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-chocolate/15 bg-paper p-1.5 focus-within:border-chocolate focus-within:ring-4 focus-within:ring-rose/50">
+        {values.map((v, i) => (
+          <span key={v} className="flex items-center gap-0.5 rounded-full bg-rose-soft py-1 pl-3 pr-1 text-sm">
+            {v}
+            <button
+              type="button"
+              aria-label={`Retirer « ${v} »`}
+              onClick={() => onChange(values.filter((_, j) => j !== i))}
+              className="flex h-6 w-6 items-center justify-center rounded-full text-cocoa hover:bg-rose hover:text-berry"
+            >
+              ×
+            </button>
+          </span>
+        ))}
+        <input
+          id={id}
+          value={draft}
+          placeholder={values.length ? "Ajouter…" : placeholder}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === ",") {
+              e.preventDefault();
+              add();
+            } else if (e.key === "Backspace" && !draft && values.length) {
+              onChange(values.slice(0, -1));
+            }
+          }}
+          onBlur={add}
+          className="min-w-32 flex-1 bg-transparent px-2 py-1.5 text-[15px] placeholder:text-cocoa-light focus:outline-none"
+        />
+      </div>
+      {hint && <p className="mt-1 text-xs text-cocoa-light">{hint}</p>}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
 /* Couleur                                                                     */
 /* -------------------------------------------------------------------------- */
 

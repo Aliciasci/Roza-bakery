@@ -52,6 +52,10 @@ export interface ConfigOption {
   image?: string;
   /** Affiche un champ libre lorsque l'option est choisie (« Autre », « sur demande »…). */
   custom?: boolean;
+  /** Saveurs proposées pour cette option (ex. coulis : framboise, mangue…). Une saveur est alors obligatoire. */
+  variants?: string[];
+  /** Intitulé du choix de saveur (défaut : « Saveur »). */
+  variantsLabel?: string;
   /** Permet de masquer temporairement une option (ex. fruit hors saison). */
   available?: boolean;
 }
@@ -169,6 +173,8 @@ export interface CustomerInfo {
 export interface CompositionDraft {
   selections: Partial<Record<CompositionStepId, string[]>>;
   customValues: Record<string, string>;
+  /** Saveur choisie par option (optionId → saveur). */
+  variants?: Record<string, string>;
   notes: Partial<Record<CompositionStepId, string>>;
 }
 

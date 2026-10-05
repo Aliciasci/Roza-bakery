@@ -34,7 +34,12 @@ export async function createOrder(payload: OrderPayload, files: UploadedFile[]):
 
   if (files.length > site.maxInspirationPhotos) throw new OrderValidationError(`${site.maxInspirationPhotos} photos maximum.`);
 
-  const draft = { selections: payload.selections, customValues: payload.customValues, notes: payload.notes };
+  const draft = {
+    selections: payload.selections,
+    customValues: payload.customValues,
+    variants: payload.variants,
+    notes: payload.notes,
+  };
   const order: Order = {
     id: randomUUID(),
     reference: makeReference(),

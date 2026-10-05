@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { ArrowLeftIcon, ChevronIcon, CloseIcon } from "@/components/ui/Icons";
+import { missingVariants } from "@/lib/composition";
 import { validateCustomer, type FieldErrors } from "@/lib/validation";
 import type { CustomerInfo } from "@/lib/types";
 import { CakeCrossSection, computeCakeTones } from "./CakeCrossSection";
@@ -91,6 +92,19 @@ export function Configurator() {
         setStepError("Merci de faire un choix pour continuer.");
         return;
       }
+      const missing = missingVariants(step, draft);
+      if (missing.length) {
+        const label = (missing[0].variantsLabel ?? "saveur").toLowerCase();
+        setStepError(
+          missing.length === 1
+            ? `Choisissez la ${label} pour « ${missing[0].label} ».`
+            : `Choisissez la ${label} pour : ${missing.map((o) => o.label).join(", ")}.`,
+        );
+        requestAnimationFrame(() =>
+          document.querySelector("[data-flavor-missing]")?.scrollIntoView({ behavior: "smooth", block: "center" }),
+        );
+        return;
+      }
       changeStep(stepIndex + 1);
       return;
     }
@@ -121,9 +135,12 @@ export function Configurator() {
     });
   }, [customer, site]);
 
+  // L'erreur disparaît dès que l'étape redevient valide
   useEffect(() => {
-    if (step && draft.selections[step.id]?.length) setStepError(null);
-  }, [draft.selections, step]);
+    if (!step) return;
+    const chosen = (draft.selections[step.id]?.length ?? 0) > 0;
+    if ((chosen || !step.required) && missingVariants(step, draft).length === 0) setStepError(null);
+  }, [draft, step]);
 
   /* --- Libellés --- */
 

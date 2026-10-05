@@ -4,7 +4,7 @@ import { useState } from "react";
 import { saveSteps } from "@/app/admin/actions";
 import { OptionSwatch } from "@/components/configurator/OptionVisual";
 import type { CompositionStep, ConfigOption, OptionGroup } from "@/lib/types";
-import { AddButton, Card, ColorPicker, ImageInput, PageTitle, RowActions, SaveBar, TextInput, Toggle, move, useEditor } from "./ui";
+import { AddButton, Card, ColorPicker, ImageInput, PageTitle, RowActions, SaveBar, TagsInput, TextInput, Toggle, move, useEditor } from "./ui";
 
 const rand = () => Math.random().toString(36).slice(2, 8);
 
@@ -141,6 +141,28 @@ export function ConfiguratorEditor({ initial }: { initial: CompositionStep[] }) 
                         value={option.description}
                         onChange={(v) => setOption(gi, oi, { description: v || undefined })}
                       />
+                      <div className="sm:col-span-2">
+                        <TagsInput
+                          label="Saveurs proposées (facultatif)"
+                          placeholder="Ex. Framboise, Mangue… puis Entrée"
+                          hint={
+                            option.variants?.length
+                              ? "La cliente devra choisir une saveur quand elle coche cette option."
+                              : "Laissez vide si l'option n'a pas de saveur à choisir."
+                          }
+                          values={option.variants ?? []}
+                          onChange={(variants) => setOption(gi, oi, { variants: variants.length ? variants : undefined })}
+                        />
+                        {option.variants?.length ? (
+                          <TextInput
+                            label="Intitulé du choix"
+                            placeholder="Saveur"
+                            value={option.variantsLabel}
+                            onChange={(v) => setOption(gi, oi, { variantsLabel: v || undefined })}
+                            className="mt-3 max-w-xs"
+                          />
+                        ) : null}
+                      </div>
                       <div className="flex flex-wrap gap-x-6 sm:col-span-2">
                         <Toggle
                           label="Disponible"

@@ -3,7 +3,7 @@
  * (sans dépendance, pour garder le bundle client léger).
  */
 import { checkPickupDate } from "./dates";
-import { cleanPhone } from "./composition";
+import { cleanPhone, missingVariants } from "./composition";
 import type { CompositionDraft, CompositionStep, CustomerInfo, SiteInfo } from "./types";
 
 export type FieldErrors<T extends string = string> = Partial<Record<T, string>>;
@@ -73,6 +73,8 @@ export function validateComposition(steps: CompositionStep[], draft: Composition
     const known = new Set(step.groups.flatMap((g) => g.options.map((o) => o.id)));
     if (ids.some((id) => !known.has(id))) return `Étape « ${step.name} » : option inconnue.`;
     if ((draft.notes[step.id]?.length ?? 0) > LIMITS.notes) return `Étape « ${step.name} » : précisions trop longues.`;
+    const missing = missingVariants(step, draft)[0];
+    if (missing) return `Étape « ${step.name} » : choisissez la ${(missing.variantsLabel ?? "saveur").toLowerCase()} pour « ${missing.label} ».`;
   }
   if (Object.values(draft.customValues).some((v) => v.length > LIMITS.custom)) return "Une précision est trop longue.";
   return null;

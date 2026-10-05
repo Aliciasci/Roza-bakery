@@ -17,7 +17,7 @@ export const emptyCustomer: CustomerInfo = {
   message: "",
 };
 
-const emptyDraft: CompositionDraft = { selections: {}, customValues: {}, notes: {} };
+const emptyDraft: CompositionDraft = { selections: {}, customValues: {}, variants: {}, notes: {} };
 
 interface State {
   draft: CompositionDraft;
@@ -32,6 +32,7 @@ type Action =
   | { type: "hydrate"; state: State }
   | { type: "toggle"; step: CompositionStep; optionId: string }
   | { type: "custom"; optionId: string; value: string }
+  | { type: "variant"; optionId: string; value: string }
   | { type: "notes"; stepId: CompositionStepId; value: string }
   | { type: "customer"; patch: Partial<CustomerInfo> }
   | { type: "goto"; index: number }
@@ -53,6 +54,11 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         draft: { ...state.draft, customValues: { ...state.draft.customValues, [action.optionId]: action.value } },
+      };
+    case "variant":
+      return {
+        ...state,
+        draft: { ...state.draft, variants: { ...state.draft.variants, [action.optionId]: action.value } },
       };
     case "notes":
       return { ...state, draft: { ...state.draft, notes: { ...state.draft.notes, [action.stepId]: action.value } } };
@@ -81,6 +87,7 @@ function sanitize(raw: unknown, steps: CompositionStep[]): State | null {
     draft: {
       selections,
       customValues: { ...(r.draft?.customValues ?? {}) },
+      variants: { ...(r.draft?.variants ?? {}) },
       notes: { ...(r.draft?.notes ?? {}) },
     },
     customer: { ...emptyCustomer, ...(r.customer ?? {}) },
@@ -104,6 +111,7 @@ interface ContextValue extends State {
   setPhotos: (files: File[]) => void;
   toggleOption: (step: CompositionStep, optionId: string) => void;
   setCustomValue: (optionId: string, value: string) => void;
+  setVariant: (optionId: string, value: string) => void;
   setNotes: (stepId: CompositionStepId, value: string) => void;
   updateCustomer: (patch: Partial<CustomerInfo>) => void;
   goToStep: (index: number) => void;
@@ -147,6 +155,7 @@ export function ConfiguratorProvider({
 
   const toggleOption = useCallback((step: CompositionStep, optionId: string) => dispatch({ type: "toggle", step, optionId }), []);
   const setCustomValue = useCallback((optionId: string, value: string) => dispatch({ type: "custom", optionId, value }), []);
+  const setVariant = useCallback((optionId: string, value: string) => dispatch({ type: "variant", optionId, value }), []);
   const setNotes = useCallback((stepId: CompositionStepId, value: string) => dispatch({ type: "notes", stepId, value }), []);
   const updateCustomer = useCallback((patch: Partial<CustomerInfo>) => dispatch({ type: "customer", patch }), []);
   const goToStep = useCallback((index: number) => dispatch({ type: "goto", index }), []);
@@ -166,12 +175,13 @@ export function ConfiguratorProvider({
       setPhotos,
       toggleOption,
       setCustomValue,
+      setVariant,
       setNotes,
       updateCustomer,
       goToStep,
       reset,
     }),
-    [state, steps, site, hydrated, photos, toggleOption, setCustomValue, setNotes, updateCustomer, goToStep, reset],
+    [state, steps, site, hydrated, photos, toggleOption, setCustomValue, setVariant, setNotes, updateCustomer, goToStep, reset],
   );
 
   return <ConfiguratorContext.Provider value={value}>{children}</ConfiguratorContext.Provider>;

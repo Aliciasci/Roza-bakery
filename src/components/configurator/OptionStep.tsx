@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
+import { Fragment, useState, type KeyboardEvent } from "react";
 import { PlusIcon } from "@/components/ui/Icons";
+import { missingVariants } from "@/lib/composition";
 import { LIMITS } from "@/lib/validation";
 import type { CompositionStep } from "@/lib/types";
 import { useConfigurator } from "./ConfiguratorProvider";
-import { OptionCard } from "./OptionCard";
+import { FlavorPicker, OptionCard } from "./OptionCard";
 import { PhotoUploader } from "./PhotoUploader";
 
 /** Navigation au clavier (flèches) entre les cartes d'un même groupe. */
@@ -21,7 +22,8 @@ function onGroupKeyDown(e: KeyboardEvent<HTMLDivElement>) {
 }
 
 export function OptionStep({ step, error }: { step: CompositionStep; error?: string | null }) {
-  const { draft, toggleOption, setCustomValue, setNotes, photos, setPhotos, site } = useConfigurator();
+  const { draft, toggleOption, setCustomValue, setVariant, setNotes, photos, setPhotos, site } = useConfigurator();
+  const missing = new Set(missingVariants(step, draft).map((o) => o.id));
   const selected = draft.selections[step.id] ?? [];
   const notes = draft.notes[step.id] ?? "";
   const hasNotesLabel = Boolean(step.notesLabel);
@@ -49,24 +51,40 @@ export function OptionStep({ step, error }: { step: CompositionStep; error?: str
               aria-label={group.label ?? step.title}
               aria-describedby={error ? `error-${step.id}` : undefined}
               onKeyDown={onGroupKeyDown}
-              className={`grid gap-3 ${
+              className={`grid grid-flow-row-dense gap-3 ${
                 visual ? "sm:grid-cols-2 xl:grid-cols-3 md:gap-4" : "grid-cols-2 xl:grid-cols-3"
               }`}
             >
-              {group.options.map((option, i) => (
-                <div key={option.id} className="h-full animate-fade-up" style={{ animationDelay: `${80 + i * 40}ms` }}>
-                  <OptionCard
-                    option={option}
-                    stepId={step.id}
-                    mode={step.mode}
-                    variant={visual ? "visual" : "compact"}
-                    selected={selected.includes(option.id)}
-                    customValue={draft.customValues[option.id]}
-                    onToggle={() => toggleOption(step, option.id)}
-                    onCustomChange={(v) => setCustomValue(option.id, v)}
-                  />
-                </div>
-              ))}
+              {group.options.map((option, i) => {
+                const isSelected = selected.includes(option.id);
+                return (
+                  <Fragment key={option.id}>
+                    <div className="h-full animate-fade-up" style={{ animationDelay: `${80 + i * 40}ms` }}>
+                      <OptionCard
+                        option={option}
+                        stepId={step.id}
+                        mode={step.mode}
+                        layout={visual ? "visual" : "compact"}
+                        selected={isSelected}
+                        customValue={draft.customValues[option.id]}
+                        onToggle={() => toggleOption(step, option.id)}
+                        onCustomChange={(v) => setCustomValue(option.id, v)}
+                      />
+                    </div>
+                    {/* Choix de la saveur : toute la largeur, sans étirer les cartes voisines */}
+                    {isSelected && option.variants?.length ? (
+                      <div className="col-span-full">
+                        <FlavorPicker
+                          option={option}
+                          flavor={draft.variants?.[option.id]}
+                          flavorMissing={Boolean(error) && missing.has(option.id)}
+                          onFlavorChange={(v) => setVariant(option.id, v)}
+                        />
+                      </div>
+                    ) : null}
+                  </Fragment>
+                );
+              })}
             </div>
           </section>
         );

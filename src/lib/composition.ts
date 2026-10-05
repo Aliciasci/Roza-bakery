@@ -8,10 +8,25 @@ export function findOption(step: CompositionStep, optionId: string): ConfigOptio
   return undefined;
 }
 
-/** Libellé lisible d'une option, avec la précision saisie pour les options « Autre ». */
-export function optionDisplayLabel(option: ConfigOption, customValues: Record<string, string>): string {
+/** Libellé lisible d'une option : saveur choisie et précision saisie pour les options « Autre ». */
+export function optionDisplayLabel(
+  option: ConfigOption,
+  customValues: Record<string, string>,
+  variants: Record<string, string> = {},
+): string {
+  const variant = option.variants?.length ? variants[option.id] : undefined;
   const custom = customValues[option.id]?.trim();
-  return option.custom && custom ? `${option.label} : ${custom}` : option.label;
+  let label = variant ? `${option.label} — ${variant}` : option.label;
+  if (option.custom && custom) label += ` : ${custom}`;
+  return label;
+}
+
+/** Options choisies dans une étape dont la saveur n'a pas encore été sélectionnée. */
+export function missingVariants(step: CompositionStep, draft: CompositionDraft): ConfigOption[] {
+  return (draft.selections[step.id] ?? [])
+    .map((id) => findOption(step, id))
+    .filter((o): o is ConfigOption => Boolean(o?.variants?.length))
+    .filter((o) => !o.variants!.includes(draft.variants?.[o.id] ?? ""));
 }
 
 /** Transforme les identifiants choisis en libellés lisibles, étape par étape. */
@@ -21,7 +36,7 @@ export function resolveComposition(steps: CompositionStep[], draft: CompositionD
     const items = ids
       .map((id) => findOption(step, id))
       .filter((o): o is ConfigOption => Boolean(o))
-      .map((o) => optionDisplayLabel(o, draft.customValues));
+      .map((o) => optionDisplayLabel(o, draft.customValues, draft.variants));
     const notes = draft.notes[step.id]?.trim();
     return { stepId: step.id, label: step.summaryLabel, items, notes: notes || undefined };
   });

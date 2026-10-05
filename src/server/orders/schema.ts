@@ -10,6 +10,7 @@ const notes = z.partialRecord(z.enum(stepIds), z.string().max(LIMITS.notes));
 export const orderPayloadSchema = z.object({
   selections,
   customValues: z.record(z.string().max(80), z.string().max(LIMITS.custom)).default({}),
+  variants: z.record(z.string().max(80), z.string().max(80)).default({}),
   notes: notes.default({}),
   customer: z.object({
     firstName: z.string().trim().max(LIMITS.name),

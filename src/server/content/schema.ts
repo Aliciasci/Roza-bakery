@@ -35,6 +35,12 @@ export const optionSchema = z.object({
   image,
   custom: z.boolean().optional(),
   available: z.boolean().optional(),
+  variants: z
+    .array(text(60).min(1))
+    .max(40)
+    .optional()
+    .transform((v) => (v && v.length ? Array.from(new Set(v)) : undefined)),
+  variantsLabel: optionalText(40),
 });
 
 export const groupSchema = z.object({
