@@ -39,4 +39,21 @@ export const site: SiteInfo = {
   maxInspirationPhotos: 5,
 };
 
-export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+/**
+ * URL publique du site (SEO, sitemap, Open Graph).
+ * Tolère une valeur sans protocole (« mon-site.up.railway.app » → https://…) et
+ * retombe sur localhost si la valeur est invalide, pour ne jamais bloquer le build.
+ */
+function normalizeSiteUrl(raw: string | undefined): string {
+  const value = raw?.trim();
+  if (!value) return "http://localhost:3000";
+  const withProtocol = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+  try {
+    return new URL(withProtocol).origin;
+  } catch {
+    console.warn(`[site] NEXT_PUBLIC_SITE_URL invalide : « ${value} » — valeur ignorée.`);
+    return "http://localhost:3000";
+  }
+}
+
+export const siteUrl = normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL);
