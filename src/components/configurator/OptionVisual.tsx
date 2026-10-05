@@ -82,12 +82,21 @@ export function OptionVisual({ option, stepId, className = "" }: { option: Confi
 /** Pastille ronde pour les options compactes (inserts, fruits, suppléments…). */
 export function OptionSwatch({ option, selected }: { option: ConfigOption; selected: boolean }) {
   const c = itemColor(option);
+  const motion = `transition-transform duration-500 ease-[var(--ease-soft)] ${selected ? "scale-105" : "group-hover:scale-105"}`;
+
+  // Photo réelle : vignette arrondie, un peu plus grande qu'une pastille pour rester lisible
+  if (option.image) {
+    return (
+      <span aria-hidden className={`relative block h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-ivory ring-1 ring-chocolate/10 sm:h-14 sm:w-14 ${motion}`}>
+        <Image src={option.image} alt="" fill sizes="56px" className="object-cover" />
+      </span>
+    );
+  }
+
   return (
     <span
       aria-hidden
-      className={`relative block h-9 w-9 shrink-0 rounded-full sm:h-11 sm:w-11 transition-transform duration-500 ease-[var(--ease-soft)] ${
-        selected ? "scale-105" : "group-hover:scale-105"
-      }`}
+      className={`relative block h-9 w-9 shrink-0 rounded-full sm:h-11 sm:w-11 ${motion}`}
       style={{
         background: option.custom ? "transparent" : c,
         boxShadow: option.custom ? "inset 0 0 0 1px rgba(58,37,32,0.3)" : "inset 0 -6px 10px rgba(58,37,32,0.10), inset 0 0 0 1px rgba(58,37,32,0.08)",
