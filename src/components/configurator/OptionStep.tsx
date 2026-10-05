@@ -2,6 +2,7 @@
 
 import { Fragment, useState, type KeyboardEvent } from "react";
 import { PlusIcon } from "@/components/ui/Icons";
+import { useI18n } from "@/i18n/client";
 import { missingVariants } from "@/lib/composition";
 import { LIMITS } from "@/lib/validation";
 import type { CompositionStep } from "@/lib/types";
@@ -23,6 +24,7 @@ function onGroupKeyDown(e: KeyboardEvent<HTMLDivElement>) {
 
 export function OptionStep({ step, error }: { step: CompositionStep; error?: string | null }) {
   const { draft, toggleOption, setCustomValue, setVariant, setNotes, photos, setPhotos, site } = useConfigurator();
+  const { t } = useI18n();
   const missing = new Set(missingVariants(step, draft).map((o) => o.id));
   const selected = draft.selections[step.id] ?? [];
   const notes = draft.notes[step.id] ?? "";
@@ -97,21 +99,27 @@ export function OptionStep({ step, error }: { step: CompositionStep; error?: str
       )}
 
       {step.allowInspiration && (
-        <PhotoUploader files={photos} onChange={setPhotos} max={site.maxInspirationPhotos} />
+        <PhotoUploader
+          files={photos}
+          onChange={setPhotos}
+          max={site.maxInspirationPhotos}
+          title={t.photos.title}
+          description={t.photos.description}
+        />
       )}
 
       <div>
         {notesOpen ? (
           <div className="animate-fade-up">
             <label htmlFor={notesId} className="mb-2 block font-serif text-xl text-chocolate">
-              {step.notesLabel ?? "Une précision ?"}
-              <span className="ml-2 font-sans text-xs font-normal text-cocoa">(facultatif)</span>
+              {step.notesLabel ?? t.configurator.noteLabel}
+              <span className="ml-2 font-sans text-xs font-normal text-cocoa">{t.configurator.optionalParen}</span>
             </label>
             <textarea
               id={notesId}
               rows={3}
               className="field resize-y"
-              placeholder={step.notesPlaceholder ?? "Ajoutez un détail, une envie particulière…"}
+              placeholder={step.notesPlaceholder ?? t.configurator.notePlaceholder}
               value={notes}
               maxLength={LIMITS.notes}
               onChange={(e) => setNotes(step.id, e.target.value)}
@@ -124,7 +132,7 @@ export function OptionStep({ step, error }: { step: CompositionStep; error?: str
             className="inline-flex min-h-11 items-center gap-2 rounded-full text-sm font-semibold text-chocolate underline decoration-chocolate/25 underline-offset-[6px] hover:decoration-chocolate"
           >
             <PlusIcon className="h-4 w-4" />
-            Ajouter une précision
+            {t.configurator.addNote}
           </button>
         )}
       </div>

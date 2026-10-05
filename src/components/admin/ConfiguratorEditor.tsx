@@ -4,7 +4,25 @@ import { useState } from "react";
 import { saveSteps } from "@/app/admin/actions";
 import { OptionSwatch } from "@/components/configurator/OptionVisual";
 import type { CompositionStep, ConfigOption, OptionGroup } from "@/lib/types";
-import { AddButton, Card, ColorPicker, ImageInput, PageTitle, RowActions, SaveBar, TagsInput, TextInput, Toggle, move, useEditor } from "./ui";
+import {
+  AddButton,
+  inputClass,
+  Card,
+  ColorPicker,
+  ImageInput,
+  LangTabs,
+  PageTitle,
+  RowActions,
+  SaveBar,
+  TagsInput,
+  TextInput,
+  Toggle,
+  TrInput,
+  move,
+  useEditor,
+  withKab,
+  type EditLang,
+} from "./ui";
 
 const rand = () => Math.random().toString(36).slice(2, 8);
 
@@ -12,6 +30,7 @@ export function ConfiguratorEditor({ initial }: { initial: CompositionStep[] }) 
   const editor = useEditor(initial, saveSteps);
   const steps = editor.value;
   const [current, setCurrent] = useState(0);
+  const [lang, setLang] = useState<EditLang>("fr");
   const step = steps[current];
 
   const setStep = (patch: Partial<CompositionStep>) =>
@@ -30,8 +49,9 @@ export function ConfiguratorEditor({ initial }: { initial: CompositionStep[] }) 
         title="Configurateur"
         intro="Modifiez les étapes de « Composer mon gâteau » : ajoutez une crème, un fruit de saison, masquez une option temporairement, changez les textes ou les photos."
       >
+        <LangTabs value={lang} onChange={setLang} />
         <a
-          href={`/composer?etape=${current + 1}`}
+          href={`${lang === "kab" ? "/kab" : ""}/composer?etape=${current + 1}`}
           target="_blank"
           rel="noopener"
           className="self-start rounded-full border border-chocolate/20 px-4 py-2 text-sm font-semibold hover:border-chocolate"
@@ -62,21 +82,31 @@ export function ConfiguratorEditor({ initial }: { initial: CompositionStep[] }) 
         <Card>
           <h2 className="font-serif text-2xl">Textes et règles de l&apos;étape</h2>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <TextInput label="Nom de l'étape" value={step.name} onChange={(v) => setStep({ name: v })} />
-            <TextInput label="Libellé dans le résumé" value={step.summaryLabel} onChange={(v) => setStep({ summaryLabel: v })} />
-            <TextInput label="Titre" value={step.title} onChange={(v) => setStep({ title: v })} className="md:col-span-2" />
-            <TextInput label="Sous-titre" value={step.subtitle} onChange={(v) => setStep({ subtitle: v })} multiline className="md:col-span-2" />
-            <TextInput
-              label="Question du champ « précision »"
-              value={step.notesLabel}
-              placeholder="Une précision ?"
-              onChange={(v) => setStep({ notesLabel: v || undefined })}
-            />
-            <TextInput
-              label="Exemple dans le champ « précision »"
-              value={step.notesPlaceholder}
-              onChange={(v) => setStep({ notesPlaceholder: v || undefined })}
-            />
+            {(
+              [
+                ["name", "Nom de l'étape", false, ""],
+                ["summaryLabel", "Libellé dans le résumé", false, ""],
+                ["title", "Titre", false, "md:col-span-2"],
+                ["subtitle", "Sous-titre", true, "md:col-span-2"],
+                ["notesLabel", "Question du champ « précision »", false, ""],
+                ["notesPlaceholder", "Exemple dans le champ « précision »", false, ""],
+              ] as const
+            ).map(([field, label, multiline, className]) => (
+              <TrInput
+                key={field}
+                lang={lang}
+                label={label}
+                multiline={multiline}
+                className={className}
+                placeholder={field === "notesLabel" ? "Une précision ?" : undefined}
+                fr={step[field]}
+                kab={step.kab?.[field]}
+                onFr={(v) =>
+                  setStep({ [field]: field === "notesLabel" || field === "notesPlaceholder" ? v || undefined : v })
+                }
+                onKab={(v) => setStep({ kab: withKab(step, field, v) })}
+              />
+            ))}
           </div>
           <div className="mt-5 grid gap-2 border-t border-chocolate/8 pt-5 md:grid-cols-3">
             <Toggle
@@ -104,11 +134,14 @@ export function ConfiguratorEditor({ initial }: { initial: CompositionStep[] }) 
         {step.groups.map((group, gi) => (
           <Card key={group.id}>
             <div className="flex flex-wrap items-end gap-3">
-              <TextInput
+              <TrInput
+                lang={lang}
                 label={step.groups.length > 1 ? `Groupe ${gi + 1}` : "Titre du groupe (facultatif)"}
-                value={group.label}
+                fr={group.label}
+                kab={group.kab?.label}
                 placeholder="Ex. Crèmes, Fruits secs…"
-                onChange={(v) => setGroup(gi, { label: v || undefined })}
+                onFr={(v) => setGroup(gi, { label: v || undefined })}
+                onKab={(v) => setGroup(gi, { kab: withKab(group, "label", v) })}
                 className="min-w-48 flex-1"
               />
               {step.groups.length > 1 && (
@@ -135,13 +168,56 @@ export function ConfiguratorEditor({ initial }: { initial: CompositionStep[] }) 
                       <ImageInput compact value={option.image} onChange={(image) => setOption(gi, oi, { image })} />
                     </div>
                     <div className="grid flex-1 gap-3 sm:grid-cols-2">
-                      <TextInput label="Nom" value={option.label} onChange={(v) => setOption(gi, oi, { label: v })} />
-                      <TextInput
+                      <TrInput
+                        lang={lang}
+                        label="Nom"
+                        fr={option.label}
+                        kab={option.kab?.label}
+                        onFr={(v) => setOption(gi, oi, { label: v })}
+                        onKab={(v) => setOption(gi, oi, { kab: withKab(option, "label", v) })}
+                      />
+                      <TrInput
+                        lang={lang}
                         label="Description (facultatif)"
-                        value={option.description}
-                        onChange={(v) => setOption(gi, oi, { description: v || undefined })}
+                        fr={option.description}
+                        kab={option.kab?.description}
+                        onFr={(v) => setOption(gi, oi, { description: v || undefined })}
+                        onKab={(v) => setOption(gi, oi, { kab: withKab(option, "description", v) })}
                       />
                       <div className="sm:col-span-2">
+                        {lang === "kab" ? (
+                          option.variants?.length ? (
+                            <div>
+                              <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-cocoa">Saveurs · taqbaylit</p>
+                              <div className="grid gap-2 sm:grid-cols-2">
+                                {option.variants.map((v, vi) => (
+                                  <input
+                                    key={v}
+                                    aria-label={`Traduction de « ${v} »`}
+                                    className={inputClass}
+                                    placeholder={v}
+                                    value={option.kab?.variants?.[vi] ?? ""}
+                                    onChange={(e) => {
+                                      const list = option.variants!.map((_, k) => option.kab?.variants?.[k] ?? "");
+                                      list[vi] = e.target.value;
+                                      setOption(gi, oi, { kab: withKab(option, "variants", list.some(Boolean) ? list : undefined) });
+                                    }}
+                                  />
+                                ))}
+                              </div>
+                              <TrInput
+                                lang={lang}
+                                label="Intitulé du choix"
+                                fr={option.variantsLabel ?? "Saveur"}
+                                kab={option.kab?.variantsLabel}
+                                onFr={() => {}}
+                                onKab={(v) => setOption(gi, oi, { kab: withKab(option, "variantsLabel", v) })}
+                                className="mt-3 max-w-xs"
+                              />
+                            </div>
+                          ) : null
+                        ) : (
+                        <>
                         <TagsInput
                           label="Saveurs proposées (facultatif)"
                           placeholder="Ex. Framboise, Mangue… puis Entrée"
@@ -162,6 +238,8 @@ export function ConfiguratorEditor({ initial }: { initial: CompositionStep[] }) 
                             className="mt-3 max-w-xs"
                           />
                         ) : null}
+                        </>
+                        )}
                       </div>
                       <div className="flex flex-wrap gap-x-6 sm:col-span-2">
                         <Toggle

@@ -4,14 +4,14 @@ import { FinalCTA } from "@/components/home/FinalCTA";
 import { JsonLd, faqJsonLd } from "@/components/seo/JsonLd";
 import { PlusIcon } from "@/components/ui/Icons";
 import { PageHero } from "@/components/ui/PageHero";
+import { localizePath } from "@/i18n/config";
+import { pageMetadata } from "@/i18n/metadata";
+import { getI18n } from "@/i18n/server";
 import { getFaq } from "@/lib/data";
 
-export const metadata: Metadata = {
-  title: "Questions fréquentes",
-  description:
-    "Délais de commande, retrait sur place, prix d'un gâteau personnalisé, photos d'inspiration… Toutes les réponses aux questions fréquentes sur Roza Bakery.",
-  alternates: { canonical: "/faq" },
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/faq", (t) => t.meta.faq);
+}
 
 /** Met en évidence les passages « [À compléter…] » des réponses. */
 function Answer({ text }: { text: string }) {
@@ -32,18 +32,19 @@ function Answer({ text }: { text: string }) {
 }
 
 export default async function FaqPage() {
-  const faq = await getFaq();
+  const { locale, t } = await getI18n();
+  const faq = await getFaq(locale);
   return (
     <>
       <JsonLd data={faqJsonLd(faq)} />
       <PageHero
-        eyebrow="FAQ"
+        eyebrow={t.faq.eyebrow}
         title={
           <>
-            Questions <em className="text-cocoa">fréquentes</em>
+            {t.faq.title1} <em className="text-cocoa">{t.faq.title2}</em>
           </>
         }
-        intro="Tout ce qu'il faut savoir avant de composer votre gâteau."
+        intro={t.faq.intro}
       />
 
       <section className="container-page pb-16">
@@ -63,9 +64,9 @@ export default async function FaqPage() {
           ))}
         </div>
         <p className="mx-auto mt-12 max-w-3xl text-center text-cocoa">
-          Une autre question ?{" "}
-          <Link href="/contact" className="font-semibold text-chocolate underline decoration-chocolate/30 underline-offset-4">
-            Écrivez-nous
+          {t.faq.more}{" "}
+          <Link href={localizePath("/contact", locale)} className="font-semibold text-chocolate underline decoration-chocolate/30 underline-offset-4">
+            {t.faq.writeUs}
           </Link>
         </p>
       </section>

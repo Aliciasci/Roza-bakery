@@ -1,4 +1,5 @@
 import type { SiteInfo } from "@/lib/types";
+import { siteKab, slotsKab } from "./kab";
 
 /**
  * Informations de la boutique.
@@ -30,13 +31,15 @@ export const site: SiteInfo = {
 
   // PLACEHOLDER — créneaux de retrait à confirmer (horaires précis à ajouter dans `hint`)
   pickupSlots: [
-    { id: "matin", label: "Matin" },
-    { id: "midi", label: "Midi" },
-    { id: "apres-midi", label: "Après-midi" },
-    { id: "fin-de-journee", label: "Fin de journée" },
+    { id: "matin", label: "Matin", kab: slotsKab.matin },
+    { id: "midi", label: "Midi", kab: slotsKab.midi },
+    { id: "apres-midi", label: "Après-midi", kab: slotsKab["apres-midi"] },
+    { id: "fin-de-journee", label: "Fin de journée", kab: slotsKab["fin-de-journee"] },
   ],
 
   maxInspirationPhotos: 5,
+
+  kab: siteKab,
 };
 
 /**

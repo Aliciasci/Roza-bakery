@@ -1,8 +1,10 @@
 import { ButtonLink } from "@/components/ui/Button";
 import { CakeImage } from "@/components/ui/CakeImage";
 import { CalendarIcon, StoreIcon } from "@/components/ui/Icons";
+import { localizePath } from "@/i18n/config";
+import { getI18n } from "@/i18n/server";
 
-function RotatingBadge() {
+function RotatingBadge({ text }: { text: string }) {
   return (
     <div
       aria-hidden
@@ -13,7 +15,7 @@ function RotatingBadge() {
           <path id="badge-circle" d="M50 50m-37 0a37 37 0 1 1 74 0a37 37 0 1 1-74 0" />
         </defs>
         <text className="fill-chocolate text-[9.2px] font-semibold uppercase tracking-[0.28em]">
-          <textPath href="#badge-circle">Fait main · Sur mesure · Roza ·</textPath>
+          <textPath href="#badge-circle">{text}</textPath>
         </text>
       </svg>
       <span className="absolute inset-0 flex items-center justify-center font-serif text-2xl italic text-chocolate">R</span>
@@ -21,7 +23,9 @@ function RotatingBadge() {
   );
 }
 
-export function Hero({ image, imageAlt }: { image?: string; imageAlt?: string }) {
+export async function Hero({ image, imageAlt }: { image?: string; imageAlt?: string }) {
+  const { locale, t } = await getI18n();
+  const href = (path: string) => localizePath(path, locale);
   return (
     <section className="relative overflow-hidden">
       {/* Halo discret */}
@@ -31,30 +35,30 @@ export function Hero({ image, imageAlt }: { image?: string; imageAlt?: string })
         <div className="lg:col-span-6 lg:pr-6">
           <p className="eyebrow flex animate-fade-up items-center gap-3">
             <span aria-hidden className="h-px w-8 bg-chocolate/30" />
-            Pâtisserie artisanale · Sur mesure
+            {t.home.eyebrow}
           </p>
           <h1 className="mt-6 animate-fade-up text-display text-chocolate [animation-delay:80ms]">
-            Votre gâteau,
+            {t.home.heroTitle1}
             <br />
-            <em className="text-cocoa">votre histoire.</em>
+            <em className="text-cocoa">{t.home.heroTitle2}</em>
           </h1>
           <p className="mt-7 max-w-md animate-fade-up text-[1.0625rem] leading-relaxed text-cocoa [animation-delay:160ms] md:text-lg">
-            Imaginez votre gâteau, choisissez chaque détail et laissez Roza Bakery créer une pièce unique à votre image.
+            {t.home.heroSubtitle}
           </p>
           <div className="mt-9 flex animate-fade-up flex-col gap-3 [animation-delay:240ms] sm:flex-row">
-            <ButtonLink href="/composer" size="lg" arrow>
-              Composer mon gâteau
+            <ButtonLink href={href("/composer")} size="lg" arrow>
+              {t.common.composeCta}
             </ButtonLink>
-            <ButtonLink href="/creations" size="lg" variant="secondary">
-              Voir nos créations
+            <ButtonLink href={href("/creations")} size="lg" variant="secondary">
+              {t.common.seeCreations}
             </ButtonLink>
           </div>
           <ul className="mt-9 flex animate-fade-up flex-wrap gap-x-6 gap-y-2 text-[0.8125rem] text-cocoa [animation-delay:320ms]">
             <li className="flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4" /> 3 à 4 jours à l&apos;avance
+              <CalendarIcon className="h-4 w-4" /> {t.common.leadTimeShort}
             </li>
             <li className="flex items-center gap-2">
-              <StoreIcon className="h-4 w-4" /> Retrait sur place
+              <StoreIcon className="h-4 w-4" /> {t.common.pickupShort}
             </li>
           </ul>
         </div>
@@ -63,16 +67,18 @@ export function Hero({ image, imageAlt }: { image?: string; imageAlt?: string })
           <div className="relative mx-auto max-w-[34rem] lg:ml-auto lg:mr-0">
             <CakeImage
               src={image}
-              alt={imageAlt || "Gâteau signature Roza Bakery"}
+              alt={imageAlt || t.home.heroAlt}
+              placeholderLabel={t.common.photoComing}
+              slotLabel={t.common.photoSlot}
               tone="rose"
               shape="aspect-[4/5] arch"
               priority
               sizes="(min-width: 1024px) 34rem, 92vw"
             />
-            <RotatingBadge />
+            <RotatingBadge text={t.home.badge} />
             <div className="absolute -bottom-6 -left-2 max-w-[15rem] rounded-2xl bg-paper/95 p-5 shadow-[0_18px_40px_-24px_rgba(58,37,32,0.55)] backdrop-blur md:-left-10">
-              <p className="script text-[1.75rem] leading-none text-rose-deep">fait main</p>
-              <p className="mt-2 text-sm leading-snug text-cocoa">Chaque création est imaginée et réalisée sur mesure.</p>
+              <p className="script text-[1.75rem] leading-none text-rose-deep">{t.home.handmade}</p>
+              <p className="mt-2 text-sm leading-snug text-cocoa">{t.home.handmadeText}</p>
             </div>
           </div>
         </div>

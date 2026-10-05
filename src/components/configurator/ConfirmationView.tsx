@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ButtonLink } from "@/components/ui/Button";
+import { useI18n } from "@/i18n/client";
 import { resolveComposition } from "@/lib/composition";
 import { computeCakeTones } from "./CakeCrossSection";
 import { LAST_ORDER_KEY, useConfigurator } from "./ConfiguratorProvider";
@@ -10,6 +11,8 @@ import type { LastOrder } from "./RecapView";
 
 export function ConfirmationView() {
   const { steps, site, reset, hydrated } = useConfigurator();
+  const { locale, t, href } = useI18n();
+  const tc = t.confirmation;
   const [order, setOrder] = useState<LastOrder | null | undefined>(undefined);
 
   useEffect(() => {
@@ -30,10 +33,10 @@ export function ConfirmationView() {
   if (!order) {
     return (
       <div className="container-page flex min-h-[70vh] flex-col items-center justify-center py-20 text-center">
-        <h1 className="text-headline">Aucune demande récente</h1>
-        <p className="mt-4 max-w-md text-cocoa">Envie de composer un nouveau gâteau ?</p>
-        <ButtonLink href="/composer" size="lg" arrow className="mt-8">
-          Composer mon gâteau
+        <h1 className="text-headline">{tc.noneTitle}</h1>
+        <p className="mt-4 max-w-md text-cocoa">{tc.noneText}</p>
+        <ButtonLink href={href("/composer")} size="lg" arrow className="mt-8">
+          {t.common.composeCta}
         </ButtonLink>
       </div>
     );
@@ -53,14 +56,13 @@ export function ConfirmationView() {
             ♡
           </span>
           <h1 className="mt-10 max-w-3xl animate-fade-up text-display [animation-delay:120ms]">
-            Votre demande est bien partie <span className="text-berry">♡</span>
+            {tc.title} <span className="text-berry">♡</span>
           </h1>
           <p className="mt-7 max-w-xl animate-fade-up text-[1.0625rem] leading-relaxed text-cocoa [animation-delay:220ms] md:text-lg">
-            Merci pour votre confiance. Roza Bakery va étudier votre création et revenir vers vous afin de confirmer sa
-            disponibilité et son prix.
+            {tc.text}
           </p>
           <p className="mt-6 animate-fade-up text-xs uppercase tracking-[0.2em] text-cocoa [animation-delay:300ms]">
-            Référence <span className="font-semibold text-chocolate">{order.reference}</span>
+            {tc.reference} <span className="font-semibold text-chocolate">{order.reference}</span>
           </p>
         </div>
       </section>
@@ -73,18 +75,15 @@ export function ConfirmationView() {
           slotLabel={slotLabel}
           photoCount={order.photoCount}
           reference={order.reference}
+          locale={locale}
         />
       </section>
 
       <section className="container-page py-20 md:py-28">
         <div className="mx-auto max-w-3xl">
-          <h2 className="text-center text-title">Et maintenant ?</h2>
+          <h2 className="text-center text-title">{tc.nextTitle}</h2>
           <ol className="mt-10 grid gap-8 sm:grid-cols-3">
-            {[
-              ["Étude", "Roza Bakery étudie votre création."],
-              ["Confirmation", "Vous êtes recontacté·e pour confirmer le prix et la disponibilité."],
-              ["Retrait", "Vous récupérez votre gâteau sur place, le jour convenu."],
-            ].map(([title, text], i) => (
+            {tc.steps.map(({ title, text }, i) => (
               <li key={title} className="text-center">
                 <span className="font-serif text-3xl italic text-rose-deep">{String(i + 1).padStart(2, "0")}</span>
                 <h3 className="mt-2 text-2xl">{title}</h3>
@@ -93,11 +92,11 @@ export function ConfirmationView() {
             ))}
           </ol>
           <div className="mt-14 flex flex-col justify-center gap-3 sm:flex-row">
-            <ButtonLink href="/" size="lg" variant="secondary">
-              Retour à l&apos;accueil
+            <ButtonLink href={href("/")} size="lg" variant="secondary">
+              {tc.home}
             </ButtonLink>
-            <ButtonLink href="/creations" size="lg" arrow>
-              Voir nos créations
+            <ButtonLink href={href("/creations")} size="lg" arrow>
+              {t.common.seeCreations}
             </ButtonLink>
           </div>
         </div>

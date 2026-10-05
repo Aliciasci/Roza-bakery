@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { OrderEditor } from "@/components/admin/OrderEditor";
 import { StatusBadge, relativePickup } from "@/components/admin/OrderList";
 import { Card } from "@/components/admin/ui";
+import { localeNames } from "@/i18n/config";
 import { formatDateLong } from "@/lib/dates";
 import { getContent } from "@/server/content/store";
 import { getOrderRepository } from "@/server/orders/repository";
@@ -33,7 +34,14 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           <h1 className="mt-1 font-serif text-4xl md:text-5xl">
             {c.firstName} {c.lastName}
           </h1>
-          <p className="mt-2 text-sm text-cocoa">Reçue le {received}</p>
+          <p className="mt-2 text-sm text-cocoa">
+            Reçue le {received}
+            {order.locale && order.locale !== "fr" && (
+              <span className="ml-2 rounded-full bg-sage-soft px-2.5 py-0.5 text-xs font-semibold text-chocolate">
+                Commande en {localeNames[order.locale].name}
+              </span>
+            )}
+          </p>
         </div>
         <StatusBadge status={order.status} />
       </div>

@@ -2,11 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { ArrowLeftIcon, ArrowRightIcon } from "@/components/ui/Icons";
-import { addDays, checkPickupDate, formatDateLong, parseISO, todayISO, toISO } from "@/lib/dates";
+import { useI18n } from "@/i18n/client";
+import { addDays, checkPickupDate, formatDateLong, formatMonthYear, parseISO, todayISO, toISO } from "@/lib/dates";
 import type { ConfiguratorSite } from "./ConfiguratorProvider";
 
-const WEEKDAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
-const WEEKDAYS_LONG = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
 
 interface Props {
   value: string;
@@ -27,7 +26,10 @@ function monthKey(iso: string) {
  * Navigation clavier : flèches (jour / semaine), Page préc./suiv. (mois), Entrée pour choisir.
  */
 export function PickupCalendar({ value, onChange, site, labelledBy, describedBy, invalid }: Props) {
+  const { locale, t } = useI18n();
   const today = useMemo(() => todayISO(), []);
+  // Lundi en premier
+  const weekdaysShort = [...t.dates.weekdaysShort.slice(1), t.dates.weekdaysShort[0]];
   const minDate = addDays(today, site.minLeadDays);
   const maxDate = addDays(today, 365);
 
@@ -88,9 +90,7 @@ export function PickupCalendar({ value, onChange, site, labelledBy, describedBy,
     }
   }
 
-  const monthLabel = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric", timeZone: "UTC" }).format(
-    parseISO(`${month}-01`),
-  );
+  const monthLabel = formatMonthYear(month, locale);
   const canPrev = month > monthKey(today);
   const canNext = month < monthKey(maxDate);
   const enabledInMonth = visibleDays.filter((d) => monthKey(d) === month && !isDisabled(d));
@@ -108,7 +108,7 @@ export function PickupCalendar({ value, onChange, site, labelledBy, describedBy,
           onClick={() => changeMonth(-1)}
           disabled={!canPrev}
           className="flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-ivory disabled:opacity-25"
-          aria-label="Mois précédent"
+          aria-label={t.calendar.prevMonth}
         >
           <ArrowLeftIcon className="h-4 w-4" />
         </button>
@@ -120,14 +120,14 @@ export function PickupCalendar({ value, onChange, site, labelledBy, describedBy,
           onClick={() => changeMonth(1)}
           disabled={!canNext}
           className="flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-ivory disabled:opacity-25"
-          aria-label="Mois suivant"
+          aria-label={t.calendar.nextMonth}
         >
           <ArrowRightIcon className="h-4 w-4" />
         </button>
       </div>
 
       <div className="mt-3 grid grid-cols-7 text-center" aria-hidden>
-        {WEEKDAYS.map((d) => (
+        {weekdaysShort.map((d) => (
           <span key={d} className="py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-cocoa-light">
             {d}
           </span>
@@ -140,7 +140,6 @@ export function PickupCalendar({ value, onChange, site, labelledBy, describedBy,
           const disabled = isDisabled(iso);
           const selected = iso === value;
           const isToday = iso === today;
-          const weekday = WEEKDAYS_LONG[(parseISO(iso).getUTCDay() + 6) % 7];
           if (!inMonth) return <span key={iso} aria-hidden />;
           return (
             <div key={iso} className="flex justify-center">
@@ -150,14 +149,13 @@ export function PickupCalendar({ value, onChange, site, labelledBy, describedBy,
                 tabIndex={iso === focusInMonth ? 0 : -1}
                 disabled={disabled}
                 aria-pressed={selected}
-                aria-label={`${formatDateLong(iso)}${disabled ? " — indisponible" : ""}`}
-                title={disabled && iso < minDate ? `Minimum ${site.minLeadDays} jours à l'avance` : undefined}
+                aria-label={`${formatDateLong(iso, locale)}${disabled ? ` — ${t.calendar.unavailable}` : ""}`}
+                title={disabled && iso < minDate ? t.calendar.minLead(site.minLeadDays) : undefined}
                 onClick={() => {
                   setFocused(iso);
                   onChange(iso);
                 }}
                 onFocus={() => setFocused(iso)}
-                data-weekday={weekday}
                 className={`relative flex h-11 w-11 items-center justify-center rounded-full text-[0.9375rem] transition-[background-color,color,transform] duration-200 active:scale-90 ${
                   selected
                     ? "bg-chocolate font-semibold text-cream shadow-[0_8px_18px_-10px_rgba(58,37,32,0.8)]"

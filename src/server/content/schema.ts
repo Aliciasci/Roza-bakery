@@ -26,6 +26,13 @@ const optionalText = (max: number) =>
     .optional()
     .transform((v) => (v ? v : undefined));
 
+/** Bloc de traductions kabyles : chaque champ est facultatif (vide = français). */
+const kabFields = <K extends string>(keys: readonly K[], max = 400) =>
+  z
+    .object(Object.fromEntries(keys.map((k) => [k, optionalText(max)])) as Record<K, ReturnType<typeof optionalText>>)
+    .partial()
+    .optional();
+
 export const optionSchema = z.object({
   id,
   label: text(80).min(1, "Chaque option doit avoir un nom"),
@@ -41,6 +48,15 @@ export const optionSchema = z.object({
     .optional()
     .transform((v) => (v && v.length ? Array.from(new Set(v)) : undefined)),
   variantsLabel: optionalText(40),
+  kab: z
+    .object({
+      label: optionalText(80),
+      description: optionalText(200),
+      variantsLabel: optionalText(40),
+      variants: z.array(z.string().trim().max(60)).max(40).optional(),
+    })
+    .partial()
+    .optional(),
 });
 
 export const groupSchema = z.object({
@@ -48,6 +64,7 @@ export const groupSchema = z.object({
   label: optionalText(80),
   description: optionalText(200),
   options: z.array(optionSchema).max(60),
+  kab: kabFields(["label", "description"] as const, 200),
 });
 
 export const stepSchema = z.object({
@@ -62,6 +79,7 @@ export const stepSchema = z.object({
   notesLabel: optionalText(120),
   notesPlaceholder: optionalText(200),
   allowInspiration: z.boolean().optional(),
+  kab: kabFields(["name", "title", "subtitle", "summaryLabel", "notesLabel", "notesPlaceholder"] as const, 300),
 });
 
 export const stepsSchema = z
@@ -87,11 +105,12 @@ export const creationSchema = z.object({
   tone,
   color: hex,
   placeholder: z.boolean().optional(),
+  kab: kabFields(["name", "description"] as const, 400),
 });
 
 export const creationsSchema = z.object({
   creations: z.array(creationSchema).max(300),
-  categories: z.array(z.object({ id, label: text(40).min(1) })).max(30),
+  categories: z.array(z.object({ id, label: text(40).min(1), kab: kabFields(["label"] as const, 40) })).max(30),
 });
 
 export const faqSchema = z.array(
@@ -100,6 +119,7 @@ export const faqSchema = z.array(
     question: text(200).min(1, "Question vide"),
     answer: text(2000).min(1, "Réponse vide"),
     placeholder: z.boolean().optional(),
+    kab: kabFields(["question", "answer"] as const, 2000),
   }),
 );
 
@@ -108,6 +128,7 @@ export const photosSchema = z.object({
   heroImageAlt: optionalText(160),
   aboutImage: image,
   aboutImageAlt: optionalText(160),
+  kab: kabFields(["heroImageAlt", "aboutImageAlt"] as const, 160),
 });
 
 const nullableText = (max: number) =>
@@ -148,7 +169,14 @@ export const siteSchema = z.object({
   closedWeekdays: z.array(z.number().int().min(0).max(6)).max(7),
   unavailableDates: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).max(400),
   pickupSlots: z
-    .array(z.object({ id, label: text(40).min(1), hint: optionalText(80) }))
+    .array(z.object({ id, label: text(40).min(1), hint: optionalText(80), kab: kabFields(["label", "hint"] as const, 80) }))
     .min(1, "Au moins un créneau de retrait"),
   maxInspirationPhotos: z.number().int().min(0).max(10),
+  kab: z
+    .object({
+      shortDescription: optionalText(300),
+      openingHours: z.array(text(120)).max(20).optional(),
+    })
+    .partial()
+    .optional(),
 });

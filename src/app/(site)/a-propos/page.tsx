@@ -3,31 +3,31 @@ import { FinalCTA } from "@/components/home/FinalCTA";
 import { CakeImage } from "@/components/ui/CakeImage";
 import { PageHero } from "@/components/ui/PageHero";
 import { Reveal } from "@/components/ui/Reveal";
-import { whyUs } from "@/content/process";
+import { pageMetadata } from "@/i18n/metadata";
+import { getI18n } from "@/i18n/server";
 import { getSitePhotos } from "@/lib/data";
 
-export const metadata: Metadata = {
-  title: "À propos — pâtisserie artisanale",
-  description: "Découvrez Roza Bakery, pâtisserie artisanale et cake design : des gâteaux personnalisés, réalisés à la main et sur mesure.",
-  alternates: { canonical: "/a-propos" },
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/a-propos", (t) => t.meta.about);
+}
 
 /**
  * ⚠️ Les blocs marqués « placeholder-text » attendent les textes réels de Roza Bakery
  * (histoire, parcours, prénom, ville…). Aucune information n'a été inventée.
  */
 export default async function AboutPage() {
-  const photos = await getSitePhotos();
+  const { locale, t } = await getI18n();
+  const photos = await getSitePhotos(locale);
   return (
     <>
       <PageHero
-        eyebrow="À propos"
+        eyebrow={t.about.eyebrow}
         title={
           <>
-            Une pâtisserie <em className="text-cocoa">faite à la main</em>
+            {t.about.title1} <em className="text-cocoa">{t.about.title2}</em>
           </>
         }
-        intro="Roza Bakery imagine et réalise des gâteaux personnalisés, pensés pour célébrer vos plus beaux moments."
+        intro={t.about.intro}
       />
 
       <section className="container-page pb-24 md:pb-32">
@@ -35,28 +35,25 @@ export default async function AboutPage() {
           <Reveal className="lg:col-span-5">
             <CakeImage
               src={photos.aboutImage}
-              alt={photos.aboutImageAlt || "Portrait de la pâtissière de Roza Bakery"}
+              alt={photos.aboutImageAlt || t.about.portraitAlt}
               tone="sage"
               shape="aspect-[4/5] arch"
-              placeholderLabel="Portrait à venir"
+              placeholderLabel={t.about.portraitComing}
+              slotLabel={t.common.photoSlot}
               sizes="(min-width: 1024px) 40vw, 92vw"
             />
           </Reveal>
           <Reveal delay={100} className="lg:col-span-6 lg:col-start-7">
-            <p className="script text-4xl text-rose-deep">notre histoire</p>
+            <p className="script text-4xl text-rose-deep">{t.about.storyScript}</p>
             <h2 className="mt-3 text-headline">
-              Derrière <em>chaque gâteau</em>
+              {t.about.storyTitle1} <em>{t.about.storyTitle2}</em>
             </h2>
             <div className="mt-8 space-y-5 text-[1.0625rem] leading-relaxed text-cocoa">
               <p>
-                <span className="placeholder-text">
-                  [À compléter par Roza Bakery : l&apos;histoire de la pâtisserie, la personne derrière les créations, ses débuts.]
-                </span>
+                <span className="placeholder-text">{t.about.story1}</span>
               </p>
               <p>
-                <span className="placeholder-text">
-                  [À compléter : la philosophie de travail, les inspirations, ce qui rend chaque création unique.]
-                </span>
+                <span className="placeholder-text">{t.about.story2}</span>
               </p>
             </div>
           </Reveal>
@@ -65,12 +62,12 @@ export default async function AboutPage() {
 
       <section className="bg-chocolate py-24 text-cream md:py-32">
         <div className="container-page">
-          <p className="eyebrow !text-cream/60">Nos valeurs</p>
+          <p className="eyebrow !text-cream/60">{t.about.valuesEyebrow}</p>
           <h2 className="mt-4 max-w-2xl text-headline text-cream">
-            L&apos;attention <em>à chaque détail</em>
+            {t.about.valuesTitle1} <em>{t.about.valuesTitle2}</em>
           </h2>
           <ul className="mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-            {whyUs.map((item, i) => (
+            {t.why.map((item, i) => (
               <Reveal as="li" key={item.title} delay={i * 70} className="border-t border-cream/15 pt-6">
                 <span className="font-serif text-xl italic text-rose">{String(i + 1).padStart(2, "0")}</span>
                 <h3 className="mt-3 text-[1.75rem] leading-tight text-cream">{item.title}</h3>

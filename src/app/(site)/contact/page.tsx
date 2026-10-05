@@ -4,51 +4,66 @@ import { ContactForm } from "@/components/ContactForm";
 import { CalendarIcon, InstagramIcon, MailIcon, PhoneIcon, PinIcon } from "@/components/ui/Icons";
 import { OrPlaceholder } from "@/components/ui/Placeholder";
 import { PageHero } from "@/components/ui/PageHero";
+import { localizePath } from "@/i18n/config";
+import { pageMetadata } from "@/i18n/metadata";
+import { getI18n } from "@/i18n/server";
 import { getSiteInfo } from "@/lib/data";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description: "Contactez Roza Bakery pour toute question sur votre gâteau personnalisé. Retrait uniquement sur place.",
-  alternates: { canonical: "/contact" },
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/contact", (t) => t.meta.contact);
+}
 
 export default async function ContactPage() {
-  const site = await getSiteInfo();
+  const { locale, t } = await getI18n();
+  const site = await getSiteInfo(locale);
 
   const items = [
     {
       Icon: InstagramIcon,
-      label: "Instagram",
+      label: t.contact.instagram,
       value: site.instagramUrl ? (
         <a href={site.instagramUrl} target="_blank" rel="noopener noreferrer" className="underline decoration-chocolate/30 underline-offset-4">
           {site.instagramHandle ?? "Instagram"}
         </a>
       ) : null,
     },
-    { Icon: MailIcon, label: "Email", value: site.email ? <a href={`mailto:${site.email}`}>{site.email}</a> : null },
-    { Icon: PhoneIcon, label: "Téléphone", value: site.phone ? <a href={`tel:${site.phone.replace(/\s/g, "")}`}>{site.phone}</a> : null },
-    { Icon: PinIcon, label: "Adresse de retrait", value: site.address },
+    { Icon: MailIcon, label: t.contact.email, value: site.email ? <a href={`mailto:${site.email}`}>{site.email}</a> : null },
+    {
+      Icon: PhoneIcon,
+      label: t.contact.phone,
+      value: site.phone ? <a href={`tel:${site.phone.replace(/\s/g, "")}`}>{site.phone}</a> : null,
+    },
+    { Icon: PinIcon, label: t.contact.address, value: site.address },
     {
       Icon: CalendarIcon,
-      label: "Horaires",
-      value: site.openingHours?.length ? site.openingHours.map((h) => <span key={h} className="block">{h}</span>) : null,
+      label: t.contact.hours,
+      value: site.openingHours?.length
+        ? site.openingHours.map((h) => (
+            <span key={h} className="block">
+              {h}
+            </span>
+          ))
+        : null,
     },
   ];
 
   return (
     <>
       <PageHero
-        eyebrow="Contact"
+        eyebrow={t.contact.eyebrow}
         title={
           <>
-            Parlons de <em className="text-cocoa">votre gâteau</em>
+            {t.contact.title1} <em className="text-cocoa">{t.contact.title2}</em>
           </>
         }
         intro={
           <>
-            Une question avant de commander ? Écrivez-nous. Pour une demande de gâteau, le plus simple reste de{" "}
-            <Link href="/composer" className="font-semibold text-chocolate underline decoration-chocolate/30 underline-offset-4">
-              composer votre création
+            {t.contact.introStart}{" "}
+            <Link
+              href={localizePath("/composer", locale)}
+              className="font-semibold text-chocolate underline decoration-chocolate/30 underline-offset-4"
+            >
+              {t.contact.introLink}
             </Link>
             .
           </>
@@ -66,14 +81,12 @@ export default async function ContactPage() {
                 <div>
                   <p className="eyebrow">{label}</p>
                   <p className="mt-1.5 font-serif text-xl leading-snug">
-                    <OrPlaceholder value={value} label={label} />
+                    <OrPlaceholder value={value} placeholder={t.common.toComplete(label)} />
                   </p>
                 </div>
               </li>
             ))}
-            <li className="pt-6 text-sm leading-relaxed text-cocoa">
-              Retrait uniquement sur place — Roza Bakery ne propose pas de livraison.
-            </li>
+            <li className="pt-6 text-sm leading-relaxed text-cocoa">{t.contact.pickupOnly}</li>
           </ul>
           <div className="relative lg:col-span-7">
             <ContactForm />

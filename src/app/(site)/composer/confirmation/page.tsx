@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { ConfirmationView } from "@/components/configurator/ConfirmationView";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = {
-  title: "Demande envoyée",
-  robots: { index: false, follow: false },
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/composer/confirmation", (t) => t.meta.confirmation, { noIndex: true });
+}
 
 export default function ConfirmationPage() {
   return <ConfirmationView />;

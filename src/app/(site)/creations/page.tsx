@@ -2,32 +2,38 @@ import type { Metadata } from "next";
 import { CreationsGallery } from "@/components/creations/CreationsGallery";
 import { FinalCTA } from "@/components/home/FinalCTA";
 import { PageHero } from "@/components/ui/PageHero";
+import { pageMetadata } from "@/i18n/metadata";
+import { getI18n } from "@/i18n/server";
 import { getCreationCategories, getCreations } from "@/lib/data";
 
-export const metadata: Metadata = {
-  title: "Nos créations — cake design & gâteaux sur mesure",
-  description:
-    "Galerie des créations Roza Bakery : wedding cakes, gâteaux d'anniversaire, cake design, gâteaux floraux, chocolat et créations personnalisées.",
-  alternates: { canonical: "/creations" },
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/creations", (t) => t.meta.creations);
+}
 
 export default async function CreationsPage() {
-  const [creations, categories] = await Promise.all([getCreations(), getCreationCategories()]);
+  const { locale, t } = await getI18n();
+  const [creations, categories] = await Promise.all([getCreations(locale), getCreationCategories(locale)]);
   return (
     <>
       <PageHero
-        eyebrow="Galerie"
+        eyebrow={t.creations.eyebrow}
         title={
           <>
-            Nos <em className="text-cocoa">créations</em>
+            {t.creations.title1} <em className="text-cocoa">{t.creations.title2}</em>
           </>
         }
-        intro="Chaque gâteau est imaginé pour une personne, une fête, une histoire. Laissez-vous inspirer, puis composez le vôtre."
+        intro={t.creations.intro}
       />
       <section className="container-page pb-10">
         <CreationsGallery creations={creations} categories={categories} />
       </section>
-      <FinalCTA title={<>Un coup de cœur ? <em>Créons le vôtre</em></>} />
+      <FinalCTA
+        title={
+          <>
+            {t.creations.ctaTitle1} <em>{t.creations.ctaTitle2}</em>
+          </>
+        }
+      />
     </>
   );
 }

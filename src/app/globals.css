@@ -23,9 +23,10 @@
   --color-paper: #fffdf9;
 
   /* Typographies (variables injectées par next/font) */
-  --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
-  --font-sans: var(--font-manrope), "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --font-script: var(--font-parisienne), "Parisienne", cursive;
+  /* Police principale → police de secours kabyle (lettres manquantes) → substitut système */
+  --font-serif: "Cormorant Garamond", "EB Garamond", "Cormorant Garamond Fallback", Georgia, serif;
+  --font-sans: "Manrope", "Noto Sans", "Manrope Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-script: "Parisienne", "EB Garamond", "Parisienne Fallback", cursive;
 
   /* Échelle éditoriale */
   --text-display: clamp(2.75rem, 1.6rem + 5.6vw, 6rem);

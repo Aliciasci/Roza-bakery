@@ -4,7 +4,24 @@ import { useState } from "react";
 import { saveSite } from "@/app/admin/actions";
 import { formatDateLong, todayISO } from "@/lib/dates";
 import type { SiteInfo } from "@/lib/types";
-import { AddButton, Card, Field, NumberInput, PageTitle, RowActions, SaveBar, TextInput, inputClass, makeId, move, useEditor } from "./ui";
+import {
+  AddButton,
+  Card,
+  Field,
+  LangTabs,
+  NumberInput,
+  PageTitle,
+  RowActions,
+  SaveBar,
+  TextInput,
+  TrInput,
+  inputClass,
+  makeId,
+  move,
+  useEditor,
+  withKab,
+  type EditLang,
+} from "./ui";
 
 const weekdays = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
 const weekOrder = [1, 2, 3, 4, 5, 6, 0];
@@ -14,11 +31,14 @@ export function SiteEditor({ initial }: { initial: SiteInfo }) {
   const site = editor.value;
   const set = (patch: Partial<SiteInfo>) => editor.setValue({ ...site, ...patch });
   const [newDate, setNewDate] = useState("");
+  const [lang, setLang] = useState<EditLang>("fr");
   const today = todayISO();
 
   return (
     <>
-      <PageTitle title="Boutique" intro="Coordonnées affichées sur le site, délais de commande et disponibilités de retrait." />
+      <PageTitle title="Boutique" intro="Coordonnées affichées sur le site, délais de commande et disponibilités de retrait.">
+        <LangTabs value={lang} onChange={setLang} />
+      </PageTitle>
 
       <div className="space-y-6">
         <Card>
@@ -27,7 +47,16 @@ export function SiteEditor({ initial }: { initial: SiteInfo }) {
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <TextInput label="Nom" value={site.name} onChange={(v) => set({ name: v })} />
             <TextInput label="Ville" hint="Utile pour le référencement local" value={site.city} onChange={(v) => set({ city: v || null })} />
-            <TextInput label="Description courte" value={site.shortDescription} multiline onChange={(v) => set({ shortDescription: v })} className="md:col-span-2" />
+            <TrInput
+              lang={lang}
+              label="Description courte"
+              multiline
+              fr={site.shortDescription}
+              kab={site.kab?.shortDescription}
+              onFr={(v) => set({ shortDescription: v })}
+              onKab={(v) => set({ kab: withKab(site, "shortDescription", v) })}
+              className="md:col-span-2"
+            />
             <TextInput label="Adresse de retrait" value={site.address} onChange={(v) => set({ address: v || null })} className="md:col-span-2" />
             <TextInput label="Email" type="email" value={site.email} onChange={(v) => set({ email: v || null })} />
             <TextInput label="Téléphone" type="tel" value={site.phone} onChange={(v) => set({ phone: v || null })} />
@@ -38,12 +67,15 @@ export function SiteEditor({ initial }: { initial: SiteInfo }) {
               value={site.instagramUrl}
               onChange={(v) => set({ instagramUrl: v || null })}
             />
-            <TextInput
+            <TrInput
+              lang={lang}
               label="Horaires (une ligne par plage)"
               multiline
               placeholder={"Mardi – Samedi : 10h – 18h"}
-              value={site.openingHours?.join("\n") ?? ""}
-              onChange={(v) => set({ openingHours: v ? v.split("\n") : null })}
+              fr={site.openingHours?.join("\n") ?? ""}
+              kab={site.kab?.openingHours?.join("\n")}
+              onFr={(v) => set({ openingHours: v ? v.split("\n") : null })}
+              onKab={(v) => set({ kab: withKab(site, "openingHours", v ? v.split("\n") : undefined) })}
               className="md:col-span-2"
             />
           </div>
@@ -137,17 +169,23 @@ export function SiteEditor({ initial }: { initial: SiteInfo }) {
           <ul className="mt-4 space-y-3">
             {site.pickupSlots.map((slot, i) => (
               <li key={slot.id} className="flex flex-wrap items-end gap-3">
-                <TextInput
+                <TrInput
+                  lang={lang}
                   label="Créneau"
-                  value={slot.label}
-                  onChange={(v) => set({ pickupSlots: site.pickupSlots.map((s, j) => (j === i ? { ...s, label: v } : s)) })}
+                  fr={slot.label}
+                  kab={slot.kab?.label}
+                  onFr={(v) => set({ pickupSlots: site.pickupSlots.map((s, j) => (j === i ? { ...s, label: v } : s)) })}
+                  onKab={(v) => set({ pickupSlots: site.pickupSlots.map((s, j) => (j === i ? { ...s, kab: withKab(s, "label", v) } : s)) })}
                   className="min-w-40 flex-1"
                 />
-                <TextInput
+                <TrInput
+                  lang={lang}
                   label="Horaires (facultatif)"
                   placeholder="10h – 12h"
-                  value={slot.hint}
-                  onChange={(v) => set({ pickupSlots: site.pickupSlots.map((s, j) => (j === i ? { ...s, hint: v || undefined } : s)) })}
+                  fr={slot.hint}
+                  kab={slot.kab?.hint}
+                  onFr={(v) => set({ pickupSlots: site.pickupSlots.map((s, j) => (j === i ? { ...s, hint: v || undefined } : s)) })}
+                  onKab={(v) => set({ pickupSlots: site.pickupSlots.map((s, j) => (j === i ? { ...s, kab: withKab(s, "hint", v) } : s)) })}
                   className="min-w-40 flex-1"
                 />
                 <RowActions

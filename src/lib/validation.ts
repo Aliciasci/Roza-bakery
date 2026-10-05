@@ -4,7 +4,10 @@
  */
 import { checkPickupDate } from "./dates";
 import { cleanPhone, missingVariants } from "./composition";
+import { fr, type Dictionary } from "@/i18n/dictionaries/fr";
 import type { CompositionDraft, CompositionStep, CustomerInfo, SiteInfo } from "./types";
+
+type Messages = Dictionary["validation"];
 
 export type FieldErrors<T extends string = string> = Partial<Record<T, string>>;
 
@@ -24,59 +27,64 @@ export function validateCustomer(
   customer: CustomerInfo,
   site: Pick<SiteInfo, "minLeadDays" | "recommendedLeadDays" | "closedWeekdays" | "unavailableDates" | "pickupSlots">,
   now?: Date,
+  m: Messages = fr.validation,
 ): FieldErrors<keyof CustomerInfo> {
   const errors: FieldErrors<keyof CustomerInfo> = {};
 
-  if (!customer.firstName.trim()) errors.firstName = "Merci d'indiquer votre prénom.";
-  else if (customer.firstName.length > LIMITS.name) errors.firstName = "Prénom trop long.";
+  if (!customer.firstName.trim()) errors.firstName = m.firstName;
+  else if (customer.firstName.length > LIMITS.name) errors.firstName = m.firstNameLong;
 
-  if (!customer.lastName.trim()) errors.lastName = "Merci d'indiquer votre nom.";
-  else if (customer.lastName.length > LIMITS.name) errors.lastName = "Nom trop long.";
+  if (!customer.lastName.trim()) errors.lastName = m.lastName;
+  else if (customer.lastName.length > LIMITS.name) errors.lastName = m.lastNameLong;
 
-  if (!customer.email.trim()) errors.email = "Merci d'indiquer votre adresse email.";
+  if (!customer.email.trim()) errors.email = m.email;
   else if (!EMAIL_RE.test(customer.email.trim()) || customer.email.length > LIMITS.email)
-    errors.email = "Cette adresse email ne semble pas valide.";
+    errors.email = m.emailInvalid;
 
   const phone = cleanPhone(customer.phone);
-  if (!phone) errors.phone = "Merci d'indiquer votre numéro de téléphone.";
+  if (!phone) errors.phone = m.phone;
   else if (phone.replace("+", "").length < 9 || phone.length > LIMITS.phone)
-    errors.phone = "Ce numéro de téléphone ne semble pas valide.";
+    errors.phone = m.phoneInvalid;
 
-  if (!customer.pickupDate) errors.pickupDate = "Merci de choisir une date de retrait.";
+  if (!customer.pickupDate) errors.pickupDate = m.date;
   else {
     const status = checkPickupDate(customer.pickupDate, site, now);
     if (status === "too-soon")
-      errors.pickupDate = `Les commandes doivent être passées au minimum ${site.minLeadDays} jours à l'avance.`;
-    else if (status === "unavailable") errors.pickupDate = "Cette date n'est pas disponible pour un retrait.";
-    else if (status === "invalid") errors.pickupDate = "Cette date n'est pas valide.";
+      errors.pickupDate = m.tooSoon(site.minLeadDays);
+    else if (status === "unavailable") errors.pickupDate = m.dateUnavailable;
+    else if (status === "invalid") errors.pickupDate = m.dateInvalid;
   }
 
-  if (!customer.pickupSlot) errors.pickupSlot = "Merci de choisir un créneau de retrait.";
-  else if (!site.pickupSlots.some((s) => s.id === customer.pickupSlot)) errors.pickupSlot = "Créneau inconnu.";
+  if (!customer.pickupSlot) errors.pickupSlot = m.slot;
+  else if (!site.pickupSlots.some((s) => s.id === customer.pickupSlot)) errors.pickupSlot = m.slotUnknown;
 
   const servings = Number(customer.servings);
-  if (!customer.servings) errors.servings = "Merci d'indiquer le nombre de personnes.";
+  if (!customer.servings) errors.servings = m.servings;
   else if (!Number.isInteger(servings) || servings < 1 || servings > LIMITS.servingsMax)
-    errors.servings = "Nombre de personnes invalide.";
+    errors.servings = m.servingsInvalid;
 
-  if (customer.message.length > LIMITS.message) errors.message = "Message trop long.";
+  if (customer.message.length > LIMITS.message) errors.message = m.messageLong;
 
   return errors;
 }
 
 /** Vérifie la composition : étapes obligatoires, identifiants connus, mode de sélection. */
-export function validateComposition(steps: CompositionStep[], draft: CompositionDraft): string | null {
+export function validateComposition(
+  steps: CompositionStep[],
+  draft: CompositionDraft,
+  m: Messages = fr.validation,
+): string | null {
   for (const step of steps) {
     const ids = draft.selections[step.id] ?? [];
-    if (step.required && ids.length === 0) return `Étape « ${step.name} » : merci de faire un choix.`;
-    if (step.mode === "single" && ids.length > 1) return `Étape « ${step.name} » : un seul choix possible.`;
+    if (step.required && ids.length === 0) return m.stepChoose(step.name);
+    if (step.mode === "single" && ids.length > 1) return m.stepSingle(step.name);
     const known = new Set(step.groups.flatMap((g) => g.options.map((o) => o.id)));
-    if (ids.some((id) => !known.has(id))) return `Étape « ${step.name} » : option inconnue.`;
-    if ((draft.notes[step.id]?.length ?? 0) > LIMITS.notes) return `Étape « ${step.name} » : précisions trop longues.`;
+    if (ids.some((id) => !known.has(id))) return m.stepUnknown(step.name);
+    if ((draft.notes[step.id]?.length ?? 0) > LIMITS.notes) return m.stepNotesLong(step.name);
     const missing = missingVariants(step, draft)[0];
-    if (missing) return `Étape « ${step.name} » : choisissez la ${(missing.variantsLabel ?? "saveur").toLowerCase()} pour « ${missing.label} ».`;
+    if (missing) return m.stepFlavor(step.name, missing.variantsLabel ?? "saveur", missing.label);
   }
-  if (Object.values(draft.customValues).some((v) => v.length > LIMITS.custom)) return "Une précision est trop longue.";
+  if (Object.values(draft.customValues).some((v) => v.length > LIMITS.custom)) return m.customLong;
   return null;
 }
 

@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import { Configurator } from "@/components/configurator/Configurator";
+import { pageMetadata } from "@/i18n/metadata";
 
-export const metadata: Metadata = {
-  title: "Composer mon gâteau personnalisé",
-  description:
-    "Composez votre gâteau sur mesure étape par étape : génoise, crème, inserts, croustillant, fruits, finition et décoration. Roza Bakery confirme ensuite le prix et la disponibilité.",
-  alternates: { canonical: "/composer" },
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/composer", (t) => t.meta.composer);
+}
 
 export default function ComposerPage() {
   return <Configurator />;

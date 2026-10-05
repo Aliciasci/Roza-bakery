@@ -22,6 +22,23 @@ npm run build && npm start   # production
 - Le brouillon est sauvegardé dans le navigateur (`localStorage`). Les photos restent en mémoire.
 - Le bouton « retour » du téléphone recule d'une étape (`?etape=N`).
 
+## Langues : français et kabyle (taqbaylit)
+
+- **Français** : adresses actuelles (`/`, `/composer`…). **Kabyle** : préfixe `/kab` (`/kab`, `/kab/composer`…).
+- Sélecteur **FR / Taqbaylit** dans l'en-tête et le menu mobile. Il garde la page courante.
+- Référencement : balises `hreflang`, `<html lang="kab">` et sitemap avec les deux langues.
+- **Textes de l'interface** : `src/i18n/dictionaries/fr.ts` (référence) et `kab.ts`. TypeScript refuse toute clé manquante.
+- **Contenu modifiable** (options, saveurs, FAQ, créations, catégories, créneaux, horaires, descriptions de photos) :
+  dans l'admin, onglet **Taqbaylit** en haut de chaque page. Un champ kabyle vide affiche le français.
+  Traductions par défaut : `src/content/kab.ts`.
+- **Commandes** : Roza Bakery voit toujours la commande en français. La fiche indique « Commande en Taqbaylit »
+  et la cliente reçoit son accusé de réception en kabyle. Les saveurs sont enregistrées sous leur nom français.
+- **Lettres kabyles** (ɛ, ɣ, ḥ, ṭ, ẓ…) : affichées avec EB Garamond / Noto Sans quand les polices principales ne les ont pas.
+  Ces polices ne sont téléchargées que sur les pages qui en ont besoin.
+
+⚠️ **Les traductions kabyles doivent être relues par une personne kabylophone.** Le glossaire des choix de
+traduction se trouve en tête de `src/i18n/dictionaries/kab.ts`.
+
 ## Déploiement sur Railway
 
 1. **New Project → Deploy from GitHub repo**, puis choisir `Roza-bakery`. Le build et le démarrage sont configurés dans `railway.json`.

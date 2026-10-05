@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckIcon } from "@/components/ui/Icons";
+import { useI18n } from "@/i18n/client";
 import { LIMITS } from "@/lib/validation";
 import type { CompositionStepId, ConfigOption } from "@/lib/types";
 import { OptionSwatch, OptionVisual } from "./OptionVisual";
@@ -48,10 +49,11 @@ export function OptionCard({
   onToggle,
   onCustomChange,
 }: Props) {
+  const { t } = useI18n();
   const inputId = `custom-${option.id}`;
   const flavors = option.variants ?? [];
-  const flavorLabel = option.variantsLabel ?? "Saveur";
-  const flavorHint = flavors.length > 1 ? `${flavors.length} ${flavorLabel.toLowerCase()}s au choix` : null;
+  const flavorLabel = option.variantsLabel ?? t.configurator.flavorDefault;
+  const flavorHint = flavors.length > 1 ? t.configurator.flavorsHint(flavors.length, flavorLabel) : null;
   const base =
     "group relative w-full text-left outline-offset-4 transition-[border-color,box-shadow,transform,background-color] duration-300 ease-[var(--ease-soft)] active:scale-[0.985]";
   const state = selected
@@ -103,13 +105,13 @@ export function OptionCard({
       {option.custom && selected && (
         <div className="mt-2 animate-fade-up">
           <label htmlFor={inputId} className="sr-only">
-            Précisez « {option.label} »
+            {t.configurator.customLabel(option.label)}
           </label>
           <input
             id={inputId}
             type="text"
             className="field !min-h-12"
-            placeholder="Précisez votre envie…"
+            placeholder={t.configurator.customPlaceholder}
             value={customValue}
             maxLength={LIMITS.custom}
             onChange={(e) => onCustomChange(e.target.value)}
@@ -133,8 +135,10 @@ export function FlavorPicker({
   flavorMissing?: boolean;
   onFlavorChange: (value: string) => void;
 }) {
+  const { t } = useI18n();
   const flavors = option.variants ?? [];
-  const flavorLabel = option.variantsLabel ?? "Saveur";
+  const labels = option.variantLabels ?? flavors;
+  const flavorLabel = option.variantsLabel ?? t.configurator.flavorDefault;
   return (
     <div
       role="radiogroup"
@@ -146,10 +150,10 @@ export function FlavorPicker({
     >
       <p className="mb-2 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-cocoa">
         {flavorLabel} · <span className="normal-case tracking-normal text-chocolate">{option.label}</span>
-        {flavorMissing && <span className="ml-1.5 normal-case tracking-normal text-berry">· à choisir</span>}
+        {flavorMissing && <span className="ml-1.5 normal-case tracking-normal text-berry">· {t.configurator.flavorToChoose}</span>}
       </p>
       <div className="flex flex-wrap gap-1.5">
-        {flavors.map((f) => {
+        {flavors.map((f, i) => {
           const on = flavor === f;
           return (
             <button
@@ -165,7 +169,7 @@ export function FlavorPicker({
                 on ? "border-chocolate bg-chocolate text-cream" : "border-chocolate/15 bg-cream text-chocolate hover:border-chocolate/40"
               }`}
             >
-              {f}
+              {labels[i] ?? f}
             </button>
           );
         })}

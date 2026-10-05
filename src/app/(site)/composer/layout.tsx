@@ -1,4 +1,5 @@
 import { ConfiguratorProvider } from "@/components/configurator/ConfiguratorProvider";
+import { getI18n } from "@/i18n/server";
 import { getCompositionSteps, getSiteInfo } from "@/lib/data";
 
 /**
@@ -6,7 +7,8 @@ import { getCompositionSteps, getSiteInfo } from "@/lib/data";
  * la création (et les photos en mémoire) reste disponible d'une page à l'autre.
  */
 export default async function ComposerLayout({ children }: { children: React.ReactNode }) {
-  const [steps, site] = await Promise.all([getCompositionSteps(), getSiteInfo()]);
+  const { locale } = await getI18n();
+  const [steps, site] = await Promise.all([getCompositionSteps(locale), getSiteInfo(locale)]);
   const configuratorSite = {
     minLeadDays: site.minLeadDays,
     recommendedLeadDays: site.recommendedLeadDays,

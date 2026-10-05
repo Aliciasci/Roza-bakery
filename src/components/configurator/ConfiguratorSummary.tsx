@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/i18n/client";
 import { resolveComposition } from "@/lib/composition";
 import { formatDateShort } from "@/lib/dates";
 import { CakeCrossSection, computeCakeTones } from "./CakeCrossSection";
@@ -14,6 +15,8 @@ export function ConfiguratorSummary({
   onSelectStep?: (index: number) => void;
 }) {
   const { steps, draft, customer, site, stepIndex, goToStep, maxReached, photos } = useConfigurator();
+  const { t } = useI18n();
+  const tc = t.configurator;
   const resolved = resolveComposition(steps, draft);
   const tones = computeCakeTones(steps, draft);
   const slot = site.pickupSlots.find((s) => s.id === customer.pickupSlot)?.label;
@@ -21,7 +24,7 @@ export function ConfiguratorSummary({
   return (
     <div>
       <div className="flex items-baseline justify-between">
-        <h2 className="font-serif text-[1.9rem] leading-none">Mon gâteau</h2>
+        <h2 className="font-serif text-[1.9rem] leading-none">{tc.summaryTitle}</h2>
         <span className="script text-2xl text-rose-deep">♡</span>
       </div>
 
@@ -50,19 +53,19 @@ export function ConfiguratorSummary({
                       (onSelectStep ?? goToStep)(i);
                       onNavigate?.();
                     }}
-                    title={`Modifier : ${row.label}`}
+                    title={tc.modify(row.label)}
                     className="text-right after:absolute after:inset-0 after:content-['']"
                   >
-                    {empty ? (step.required ? "À choisir" : "—") : row.items.join(", ")}
+                    {empty ? (step.required ? tc.toChoose : "—") : row.items.join(", ")}
                   </button>
                 ) : empty ? (
-                  step.required ? "À choisir" : "—"
+                  step.required ? tc.toChoose : "—"
                 ) : (
                   row.items.join(", ")
                 )}
                 {photos.length > 0 && row.stepId === "decoration" && (
                   <span className="block text-xs font-normal text-cocoa">
-                    {photos.length} photo{photos.length > 1 ? "s" : ""} d&apos;inspiration
+                    {tc.photosCount(photos.length)}
                   </span>
                 )}
               </dd>
@@ -71,7 +74,7 @@ export function ConfiguratorSummary({
         })}
         {customer.pickupDate && (
           <div className="flex items-baseline justify-between gap-4 border-t border-chocolate/15 py-3">
-            <dt className="text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-cocoa">Retrait</dt>
+            <dt className="text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-cocoa">{tc.pickup}</dt>
             <dd className="text-right text-sm font-medium">
               {formatDateShort(customer.pickupDate)}
               {slot && <span className="font-normal text-cocoa"> · {slot}</span>}
@@ -81,7 +84,7 @@ export function ConfiguratorSummary({
       </dl>
 
       <p className="mt-5 rounded-2xl bg-rose-soft/70 p-4 text-[0.8125rem] leading-relaxed text-chocolate">
-        Le prix de votre création sera confirmé par Roza Bakery après étude de votre demande.
+        {t.common.priceNote}
       </p>
     </div>
   );

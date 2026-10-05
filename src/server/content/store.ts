@@ -5,7 +5,7 @@ import { compositionSteps } from "@/content/configurator";
 import { creationCategories, creations } from "@/content/creations";
 import { faq } from "@/content/faq";
 import { site } from "@/content/site";
-import type { SiteContent } from "@/lib/types";
+import type { CompositionStep, SiteContent } from "@/lib/types";
 import { DATA_DIR } from "@/server/data-dir";
 
 /**
@@ -44,13 +44,44 @@ async function writeStored(data: Partial<SiteContent>) {
   await rename(tmp, FILE); // écriture atomique
 }
 
+/** Complète les traductions manquantes d'éléments enregistrés avec celles du contenu par défaut (même identifiant). */
+function withDefaultKab<T extends { id: string; kab?: object }>(items: T[], defaults: { id: string; kab?: object }[]): T[] {
+  const byId = new Map(defaults.map((d) => [d.id, d.kab]));
+  return items.map((item) => (item.kab || !byId.get(item.id) ? item : { ...item, kab: byId.get(item.id) }));
+}
+
+function mergeStepTranslations(steps: CompositionStep[]): CompositionStep[] {
+  return withDefaultKab(steps, defaultContent.steps).map((step) => {
+    const defStep = defaultContent.steps.find((s) => s.id === step.id);
+    if (!defStep) return step;
+    const defGroups = defStep.groups;
+    const defOptions = defGroups.flatMap((g) => g.options);
+    return {
+      ...step,
+      groups: withDefaultKab(step.groups, defGroups).map((group) => ({
+        ...group,
+        options: withDefaultKab(group.options, defOptions),
+      })),
+    };
+  });
+}
+
 export async function getContent(): Promise<SiteContent> {
   const stored = await readStored();
+  const site = { ...defaultContent.site, ...stored.site };
   return {
     ...defaultContent,
     ...stored,
     // Les nouveaux réglages ajoutés au code restent disponibles même si content.json est plus ancien
-    site: { ...defaultContent.site, ...stored.site },
+    site: {
+      ...site,
+      kab: site.kab ?? defaultContent.site.kab,
+      pickupSlots: withDefaultKab(site.pickupSlots, defaultContent.site.pickupSlots),
+    },
+    steps: mergeStepTranslations(stored.steps ?? defaultContent.steps),
+    faq: withDefaultKab(stored.faq ?? defaultContent.faq, defaultContent.faq),
+    categories: withDefaultKab(stored.categories ?? defaultContent.categories, defaultContent.categories),
+    creations: withDefaultKab(stored.creations ?? defaultContent.creations, defaultContent.creations),
   };
 }
 

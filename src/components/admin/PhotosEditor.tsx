@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { savePhotos } from "@/app/admin/actions";
 import { CakeImage } from "@/components/ui/CakeImage";
 import type { SitePhotos, Tone } from "@/lib/types";
-import { Card, ImageInput, PageTitle, SaveBar, TextInput, useEditor } from "./ui";
+import { Card, ImageInput, LangTabs, PageTitle, SaveBar, TrInput, useEditor, withKab, type EditLang } from "./ui";
 
 const slots: {
   key: "heroImage" | "aboutImage";
@@ -45,12 +46,15 @@ const slots: {
 
 export function PhotosEditor({ initial }: { initial: SitePhotos }) {
   const editor = useEditor(initial, savePhotos);
+  const [lang, setLang] = useState<EditLang>("fr");
   const photos = editor.value;
   const set = (patch: Partial<SitePhotos>) => editor.setValue({ ...photos, ...patch });
 
   return (
     <>
-      <PageTitle title="Photos du site" intro="Les grandes photos des pages. Les photos des créations et des options se gèrent dans leurs sections." />
+      <PageTitle title="Photos du site" intro="Les grandes photos des pages. Les photos des créations et des options se gèrent dans leurs sections.">
+        <LangTabs value={lang} onChange={setLang} />
+      </PageTitle>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {slots.map((slot) => (
@@ -79,12 +83,15 @@ export function PhotosEditor({ initial }: { initial: SitePhotos }) {
             <div className="mt-6 space-y-4">
               <ImageInput value={photos[slot.key]} onChange={(url) => set({ [slot.key]: url })} />
               <p className="text-xs text-cocoa-light">{slot.advice}</p>
-              <TextInput
+              <TrInput
+                lang={lang}
                 label="Description de la photo"
                 hint="Lue par les lecteurs d'écran et utile au référencement."
                 placeholder={slot.defaultAlt}
-                value={photos[slot.altKey]}
-                onChange={(v) => set({ [slot.altKey]: v || undefined })}
+                fr={photos[slot.altKey]}
+                kab={photos.kab?.[slot.altKey]}
+                onFr={(v) => set({ [slot.altKey]: v || undefined })}
+                onKab={(v) => set({ kab: withKab(photos, slot.altKey, v) })}
               />
             </div>
           </Card>

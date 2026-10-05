@@ -1,11 +1,21 @@
 import Link from "next/link";
 
-export function Logo({ className = "", tone = "dark" }: { className?: string; tone?: "dark" | "light" }) {
+export function Logo({
+  className = "",
+  tone = "dark",
+  href = "/",
+  label = "Roza Bakery",
+}: {
+  className?: string;
+  tone?: "dark" | "light";
+  href?: string;
+  label?: string;
+}) {
   const color = tone === "dark" ? "text-chocolate" : "text-cream";
   return (
     <Link
-      href="/"
-      aria-label="Roza Bakery — accueil"
+      href={href}
+      aria-label={label}
       className={`inline-flex flex-col items-start leading-none ${color} ${className}`}
     >
       <span className="font-serif text-[1.85rem] italic tracking-[-0.01em] md:text-[2.1rem]">Roza</span>

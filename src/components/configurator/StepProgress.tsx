@@ -1,5 +1,7 @@
 "use client";
 
+import { useI18n } from "@/i18n/client";
+
 interface Props {
   names: string[];
   current: number;
@@ -9,12 +11,13 @@ interface Props {
 
 /** Progression segmentée : chaque segment déjà atteint est cliquable. */
 export function StepProgress({ names, current, maxReached, onSelect }: Props) {
+  const { t } = useI18n();
   const total = names.length;
   return (
-    <nav aria-label="Progression de la création">
+    <nav aria-label={t.configurator.progressLabel}>
       <div className="flex items-baseline justify-between gap-4">
         <p className="eyebrow" aria-live="polite">
-          Étape <span className="text-chocolate">{String(current + 1).padStart(2, "0")}</span>
+          {t.configurator.stepWord} <span className="text-chocolate">{String(current + 1).padStart(2, "0")}</span>
           <span className="text-cocoa-light"> / {String(total).padStart(2, "0")}</span>
         </p>
         <p className="truncate text-xs text-cocoa">{names[current]}</p>
@@ -31,7 +34,7 @@ export function StepProgress({ names, current, maxReached, onSelect }: Props) {
                 disabled={!reachable || active}
                 onClick={() => onSelect(i)}
                 aria-current={active ? "step" : undefined}
-                aria-label={`Étape ${i + 1} : ${name}${done ? " (complétée)" : ""}`}
+                aria-label={t.configurator.stepAria(i + 1, name, done)}
                 className="group block w-full py-2 disabled:cursor-default"
               >
                 <span className="block h-[3px] overflow-hidden rounded-full bg-chocolate/10">

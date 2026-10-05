@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { CakeImage } from "@/components/ui/CakeImage";
-import type { Creation, CreationCategory } from "@/lib/types";
+import { useI18n } from "@/i18n/client";
+import type { Creation, CreationCategory, CreationCategoryInfo } from "@/lib/types";
 
 const ratioClass: Record<Creation["ratio"], string> = {
   portrait: "aspect-[4/5]",
@@ -12,21 +13,22 @@ const ratioClass: Record<Creation["ratio"], string> = {
 
 interface Props {
   creations: Creation[];
-  categories: { id: CreationCategory; label: string }[];
+  categories: CreationCategoryInfo[];
 }
 
 export function CreationsGallery({ creations, categories }: Props) {
+  const { t } = useI18n();
   const [active, setActive] = useState<CreationCategory | "all">("all");
   const usedCategories = categories.filter((c) => creations.some((cr) => cr.categories.includes(c.id)));
   const visible = active === "all" ? creations : creations.filter((c) => c.categories.includes(active));
   const labelOf = (id: CreationCategory) => categories.find((c) => c.id === id)?.label ?? id;
 
-  const filters = [{ id: "all" as const, label: "Toutes" }, ...usedCategories];
+  const filters = [{ id: "all" as const, label: t.creations.all }, ...usedCategories];
 
   return (
     <div>
       <div className="sticky top-16 z-20 -mx-5 bg-cream/92 py-3 backdrop-blur-md md:top-20 md:-mx-10">
-        <div role="group" aria-label="Filtrer par catégorie" className="no-scrollbar flex gap-2 overflow-x-auto px-5 md:flex-wrap md:px-10">
+        <div role="group" aria-label={t.creations.filterLabel} className="no-scrollbar flex gap-2 overflow-x-auto px-5 md:flex-wrap md:px-10">
           {filters.map((f) => {
             const pressed = active === f.id;
             return (
@@ -47,7 +49,7 @@ export function CreationsGallery({ creations, categories }: Props) {
       </div>
 
       <p className="sr-only" aria-live="polite">
-        {visible.length} création{visible.length > 1 ? "s" : ""} affichée{visible.length > 1 ? "s" : ""}
+        {t.creations.count(visible.length)}
       </p>
 
       <ul key={active} className="mt-8 columns-2 gap-3 sm:gap-5 lg:columns-3 lg:gap-7">
@@ -65,6 +67,8 @@ export function CreationsGallery({ creations, categories }: Props) {
                     alt={c.name}
                     tone={c.tone}
                     color={c.color}
+                    placeholderLabel={t.common.photoComing}
+                    slotLabel={t.common.photoSlot}
                     shape={`${ratioClass[c.ratio]} rounded-2xl`}
                     sizes="(min-width: 1024px) 30vw, 46vw"
                   />
@@ -75,7 +79,7 @@ export function CreationsGallery({ creations, categories }: Props) {
                   <p className="eyebrow !text-[0.625rem] sm:!text-[0.6875rem]">{c.categories.map(labelOf).join(" · ")}</p>
                   {c.placeholder && (
                     <span className="rounded-full bg-rose/60 px-2 py-0.5 text-[0.625rem] font-semibold uppercase tracking-wider text-chocolate">
-                      Exemple
+                      {t.common.example}
                     </span>
                   )}
                 </div>
@@ -87,7 +91,7 @@ export function CreationsGallery({ creations, categories }: Props) {
         ))}
       </ul>
 
-      {visible.length === 0 && <p className="py-20 text-center text-cocoa">Aucune création dans cette catégorie pour le moment.</p>}
+      {visible.length === 0 && <p className="py-20 text-center text-cocoa">{t.creations.empty}</p>}
     </div>
   );
 }

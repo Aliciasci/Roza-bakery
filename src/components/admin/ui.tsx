@@ -237,6 +237,92 @@ export function Toggle({ label, checked, onChange, description }: { label: strin
 }
 
 /* -------------------------------------------------------------------------- */
+/* Langue d'édition (français / kabyle)                                        */
+/* -------------------------------------------------------------------------- */
+
+export type EditLang = "fr" | "kab";
+
+/** Onglets « Français / Taqbaylit » : en mode kabyle, les champs texte éditent la traduction. */
+export function LangTabs({ value, onChange }: { value: EditLang; onChange: (lang: EditLang) => void }) {
+  const tabs: { id: EditLang; label: string; extra?: string }[] = [
+    { id: "fr", label: "Français" },
+    { id: "kab", label: "Taqbaylit", extra: "ⵜⴰⵇⴱⴰⵢⵍⵉⵜ" },
+  ];
+  return (
+    <div className="flex flex-col items-start gap-1.5 md:items-end">
+      <div role="tablist" aria-label="Langue des textes" className="inline-flex rounded-full bg-paper p-1 ring-1 ring-chocolate/10">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={value === tab.id}
+            onClick={() => onChange(tab.id)}
+            className="flex min-h-10 items-center gap-2 rounded-full px-4 text-sm font-medium transition aria-selected:bg-chocolate aria-selected:text-cream"
+          >
+            {tab.label}
+            {tab.extra && <span className="font-[family-name:var(--font-tifinagh)] text-xs opacity-70">{tab.extra}</span>}
+          </button>
+        ))}
+      </div>
+      {value === "kab" && (
+        <p className="max-w-xs text-xs text-cocoa md:text-right">
+          Champ vide = le texte français est affiché sur la version kabyle.
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Champ texte bilingue : en français, édite la valeur ; en kabyle, édite la traduction
+ * (le texte français sert d'exemple en grisé).
+ */
+export function TrInput({
+  lang,
+  label,
+  fr,
+  kab,
+  onFr,
+  onKab,
+  multiline,
+  placeholder,
+  hint,
+  className,
+}: {
+  lang: EditLang;
+  label: string;
+  fr: string | undefined | null;
+  kab: string | undefined;
+  onFr: (value: string) => void;
+  onKab: (value: string | undefined) => void;
+  multiline?: boolean;
+  placeholder?: string;
+  hint?: string;
+  className?: string;
+}) {
+  if (lang === "fr") {
+    return <TextInput label={label} value={fr} onChange={onFr} multiline={multiline} placeholder={placeholder} hint={hint} className={className} />;
+  }
+  return (
+    <TextInput
+      label={`${label} · taqbaylit`}
+      value={kab}
+      onChange={(v) => onKab(v || undefined)}
+      multiline={multiline}
+      placeholder={fr || placeholder}
+      hint={fr ? `FR : ${fr}` : hint}
+      className={className}
+    />
+  );
+}
+
+/** Met à jour un champ du bloc de traduction `kab` d'un élément. */
+export function withKab<T extends { kab?: object }>(item: T, field: string, value: unknown): T["kab"] {
+  return { ...(item.kab ?? {}), [field]: value } as T["kab"];
+}
+
+/* -------------------------------------------------------------------------- */
 /* Liste de valeurs (saveurs…)                                                 */
 /* -------------------------------------------------------------------------- */
 

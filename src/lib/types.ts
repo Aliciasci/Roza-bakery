@@ -1,3 +1,5 @@
+import type { Locale } from "@/i18n/config";
+
 /**
  * Modèle de données central de Roza Bakery.
  *
@@ -40,6 +42,18 @@ export type Tone =
   | "white"
   | "neutral";
 
+/* -------------------------------------------------------------------------- */
+/* Traductions du contenu (kabyle). Champ vide = texte français utilisé.       */
+/* -------------------------------------------------------------------------- */
+
+export interface OptionTranslation {
+  label?: string;
+  description?: string;
+  variantsLabel?: string;
+  /** Saveurs traduites, dans le même ordre que `variants`. */
+  variants?: string[];
+}
+
 export interface ConfigOption {
   /** Identifiant unique dans tout le configurateur (stable : utilisé dans les commandes). */
   id: string;
@@ -56,6 +70,12 @@ export interface ConfigOption {
   variants?: string[];
   /** Intitulé du choix de saveur (défaut : « Saveur »). */
   variantsLabel?: string;
+  kab?: OptionTranslation;
+  /**
+   * Libellés des saveurs à afficher (calculés selon la langue, jamais enregistrés).
+   * La valeur enregistrée dans la commande reste toujours la saveur française (`variants`).
+   */
+  variantLabels?: string[];
   /** Permet de masquer temporairement une option (ex. fruit hors saison). */
   available?: boolean;
 }
@@ -66,6 +86,7 @@ export interface OptionGroup {
   label?: string;
   description?: string;
   options: ConfigOption[];
+  kab?: { label?: string; description?: string };
 }
 
 export type CompositionStepId =
@@ -93,12 +114,14 @@ export interface CompositionStep {
   notesPlaceholder?: string;
   /** Afficher l'envoi de photos d'inspiration dans cette étape. */
   allowInspiration?: boolean;
+  kab?: Partial<Pick<CompositionStep, "name" | "title" | "subtitle" | "summaryLabel" | "notesLabel" | "notesPlaceholder">>;
 }
 
 export interface PickupSlot {
   id: string;
   label: string;
   hint?: string;
+  kab?: { label?: string; hint?: string };
 }
 
 export interface SiteInfo {
@@ -122,6 +145,7 @@ export interface SiteInfo {
   unavailableDates: string[];
   pickupSlots: PickupSlot[];
   maxInspirationPhotos: number;
+  kab?: { shortDescription?: string; openingHours?: string[] };
 }
 
 /** Identifiant de catégorie (gérées depuis l'admin). */
@@ -130,6 +154,7 @@ export type CreationCategory = string;
 export interface CreationCategoryInfo {
   id: CreationCategory;
   label: string;
+  kab?: { label?: string };
 }
 
 export interface Creation {
@@ -144,6 +169,7 @@ export interface Creation {
   color?: string;
   /** `true` = entrée d'exemple à remplacer par une vraie création. */
   placeholder?: boolean;
+  kab?: { name?: string; description?: string };
 }
 
 export interface FaqItem {
@@ -152,6 +178,7 @@ export interface FaqItem {
   answer: string;
   /** Réponse à compléter par Roza Bakery. */
   placeholder?: boolean;
+  kab?: { question?: string; answer?: string };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -200,6 +227,8 @@ export interface Order {
   composition: ResolvedStep[];
   raw: CompositionDraft;
   customer: CustomerInfo;
+  /** Langue utilisée par la cliente sur le site (emails envoyés dans cette langue). */
+  locale?: Locale;
   inspirationFiles: { name: string; type: string; size: number; storedAs?: string }[];
   /** Renseigné par Roza Bakery après étude — jamais calculé automatiquement. */
   confirmedPrice: number | null;
@@ -217,6 +246,7 @@ export interface SitePhotos {
   /** Portrait de la page À propos. */
   aboutImage?: string;
   aboutImageAlt?: string;
+  kab?: { heroImageAlt?: string; aboutImageAlt?: string };
 }
 
 export interface SiteContent {

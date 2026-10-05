@@ -1,11 +1,12 @@
 import type { FaqItem } from "@/lib/types";
+import { faqKab } from "./kab";
 
 /**
  * Questions fréquentes.
  * Les entrées `placeholder: true` contiennent une réponse à compléter / valider
  * par Roza Bakery (elles ne sont pas incluses dans les données structurées SEO).
  */
-export const faq: FaqItem[] = [
+const baseFaq: FaqItem[] = [
   {
     id: "delai",
     question: "Combien de temps à l'avance dois-je commander ?",
@@ -58,3 +59,5 @@ export const faq: FaqItem[] = [
       "Oui, chaque étape du configurateur propose une option « Autre » ou « sur demande », et vous pouvez ajouter un message libre. Roza Bakery étudiera votre demande et vous dira ce qui est réalisable.",
   },
 ];
+
+export const faq: FaqItem[] = baseFaq.map((item) => ({ ...item, ...(faqKab[item.id] && { kab: faqKab[item.id] }) }));

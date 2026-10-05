@@ -15,6 +15,8 @@ interface Props {
   priority?: boolean;
   /** Texte affiché sur l'emplacement vide. */
   placeholderLabel?: string;
+  /** Complément lu par les lecteurs d'écran sur l'emplacement vide. */
+  slotLabel?: string;
 }
 
 /** Luminance approximative d'une couleur #rrggbb. */
@@ -38,6 +40,7 @@ export function CakeImage({
   sizes = "(min-width: 1024px) 40vw, 100vw",
   priority,
   placeholderLabel = "Photo Roza Bakery à venir",
+  slotLabel = "emplacement photo (à remplacer)",
 }: Props) {
   if (src) {
     return (
@@ -53,7 +56,7 @@ export function CakeImage({
   return (
     <div
       role="img"
-      aria-label={`${alt} — emplacement photo (à remplacer)`}
+      aria-label={`${alt} — ${slotLabel}`}
       className={`relative isolate flex items-center justify-center overflow-hidden ${shape} ${className}`}
       style={{ background: `color-mix(in srgb, ${color} ${dark ? 78 : 42}%, #f4ede3)` }}
     >

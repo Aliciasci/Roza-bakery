@@ -1,9 +1,28 @@
 "use client";
 
+import { useState } from "react";
 import { saveCreations } from "@/app/admin/actions";
 import { CakeImage } from "@/components/ui/CakeImage";
 import type { Creation, CreationCategoryInfo } from "@/lib/types";
-import { AddButton, Card, ColorPicker, Field, ImageInput, PageTitle, RowActions, SaveBar, TextInput, Toggle, inputClass, makeId, move, useEditor } from "./ui";
+import {
+  AddButton,
+  Card,
+  ColorPicker,
+  Field,
+  ImageInput,
+  LangTabs,
+  PageTitle,
+  RowActions,
+  SaveBar,
+  Toggle,
+  TrInput,
+  inputClass,
+  makeId,
+  move,
+  useEditor,
+  withKab,
+  type EditLang,
+} from "./ui";
 
 interface Value {
   creations: Creation[];
@@ -18,6 +37,7 @@ const ratios: { id: Creation["ratio"]; label: string }[] = [
 
 export function CreationsEditor({ initial }: { initial: Value }) {
   const editor = useEditor(initial, saveCreations);
+  const [lang, setLang] = useState<EditLang>("fr");
   const { creations, categories } = editor.value;
   const set = (patch: Partial<Value>) => editor.setValue({ ...editor.value, ...patch });
   const setCreation = (i: number, patch: Partial<Creation>) =>
@@ -25,7 +45,9 @@ export function CreationsEditor({ initial }: { initial: Value }) {
 
   return (
     <>
-      <PageTitle title="Créations" intro="La galerie « Nos créations ». Les 6 premières apparaissent aussi sur la page d'accueil." />
+      <PageTitle title="Créations" intro="La galerie « Nos créations ». Les 6 premières apparaissent aussi sur la page d'accueil.">
+        <LangTabs value={lang} onChange={setLang} />
+      </PageTitle>
 
       <Card className="mb-6">
         <h2 className="font-serif text-2xl">Catégories (filtres)</h2>
@@ -33,9 +55,16 @@ export function CreationsEditor({ initial }: { initial: Value }) {
           {categories.map((cat, i) => (
             <li key={cat.id} className="flex items-center gap-1 rounded-full border border-chocolate/15 bg-cream py-1 pl-3 pr-1">
               <input
-                aria-label="Nom de la catégorie"
-                value={cat.label}
-                onChange={(e) => set({ categories: categories.map((c, j) => (j === i ? { ...c, label: e.target.value } : c)) })}
+                aria-label={lang === "kab" ? `Traduction de « ${cat.label} »` : "Nom de la catégorie"}
+                value={lang === "kab" ? (cat.kab?.label ?? "") : cat.label}
+                placeholder={lang === "kab" ? cat.label : undefined}
+                onChange={(e) =>
+                  set({
+                    categories: categories.map((c, j) =>
+                      j !== i ? c : lang === "kab" ? { ...c, kab: withKab(c, "label", e.target.value || undefined) } : { ...c, label: e.target.value },
+                    ),
+                  })
+                }
                 className="w-28 bg-transparent text-sm focus:outline-none"
               />
               <button
@@ -71,7 +100,14 @@ export function CreationsEditor({ initial }: { initial: Value }) {
                 </div>
               </div>
               <div className="grid flex-1 gap-4 sm:grid-cols-2">
-                <TextInput label="Nom" value={c.name} onChange={(v) => setCreation(i, { name: v })} />
+                <TrInput
+                  lang={lang}
+                  label="Nom"
+                  fr={c.name}
+                  kab={c.kab?.name}
+                  onFr={(v) => setCreation(i, { name: v })}
+                  onKab={(v) => setCreation(i, { kab: withKab(c, "name", v) })}
+                />
                 <Field label="Format">
                   {(id) => (
                     <select id={id} className={inputClass} value={c.ratio} onChange={(e) => setCreation(i, { ratio: e.target.value as Creation["ratio"] })}>
@@ -83,7 +119,16 @@ export function CreationsEditor({ initial }: { initial: Value }) {
                     </select>
                   )}
                 </Field>
-                <TextInput label="Description" value={c.description} multiline onChange={(v) => setCreation(i, { description: v })} className="sm:col-span-2" />
+                <TrInput
+                  lang={lang}
+                  label="Description"
+                  multiline
+                  fr={c.description}
+                  kab={c.kab?.description}
+                  onFr={(v) => setCreation(i, { description: v })}
+                  onKab={(v) => setCreation(i, { kab: withKab(c, "description", v) })}
+                  className="sm:col-span-2"
+                />
                 <div className="sm:col-span-2">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-cocoa">Catégories</p>
                   <div className="flex flex-wrap gap-2">

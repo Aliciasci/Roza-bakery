@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { CalendarIcon, MinusIcon, PlusIcon, StoreIcon } from "@/components/ui/Icons";
+import { useI18n } from "@/i18n/client";
 import { checkPickupDate, formatDateLong } from "@/lib/dates";
 import { LIMITS, type FieldErrors } from "@/lib/validation";
 import type { CustomerInfo } from "@/lib/types";
@@ -50,6 +51,8 @@ const describe = (id: string, error?: string) => (error ? `${id}-error` : undefi
 
 export function CustomerStep({ errors }: { errors: Errors }) {
   const { customer, updateCustomer, site, photos, setPhotos } = useConfigurator();
+  const { locale, t } = useI18n();
+  const tc = t.customer;
   const dateStatus = customer.pickupDate ? checkPickupDate(customer.pickupDate, site) : null;
   const servings = Number(customer.servings) || 0;
 
@@ -70,28 +73,28 @@ export function CustomerStep({ errors }: { errors: Errors }) {
       <div className="grid gap-3 sm:grid-cols-2">
         <p className="flex items-start gap-3 rounded-2xl bg-rose-soft/80 p-4 text-sm leading-snug text-chocolate">
           <CalendarIcon className="mt-0.5 h-5 w-5 shrink-0" />
-          Les commandes doivent être passées au minimum {site.minLeadDays} à {site.recommendedLeadDays} jours à l&apos;avance.
+          {tc.leadNotice(site.minLeadDays, site.recommendedLeadDays)}
         </p>
         <p className="flex items-start gap-3 rounded-2xl bg-sage-soft p-4 text-sm leading-snug text-chocolate">
           <StoreIcon className="mt-0.5 h-5 w-5 shrink-0" />
-          Retrait uniquement sur place — pas de livraison.
+          {tc.pickupNotice}
         </p>
       </div>
 
       {/* Coordonnées */}
       <fieldset>
-        <legend className="mb-5 font-serif text-[1.75rem] leading-tight">Vos coordonnées</legend>
+        <legend className="mb-5 font-serif text-[1.75rem] leading-tight">{tc.contactLegend}</legend>
         <div className="grid gap-5 sm:grid-cols-2">
-          <Field id="f-firstName" label="Prénom" error={errors.firstName}>
+          <Field id="f-firstName" label={tc.firstName} error={errors.firstName}>
             <input {...input("firstName", { autoComplete: "given-name", maxLength: LIMITS.name })} />
           </Field>
-          <Field id="f-lastName" label="Nom" error={errors.lastName}>
+          <Field id="f-lastName" label={tc.lastName} error={errors.lastName}>
             <input {...input("lastName", { autoComplete: "family-name", maxLength: LIMITS.name })} />
           </Field>
-          <Field id="f-email" label="Email" error={errors.email}>
+          <Field id="f-email" label={tc.email} error={errors.email}>
             <input {...input("email", { type: "email", autoComplete: "email", inputMode: "email", maxLength: LIMITS.email })} />
           </Field>
-          <Field id="f-phone" label="Téléphone" error={errors.phone}>
+          <Field id="f-phone" label={tc.phone} error={errors.phone}>
             <input {...input("phone", { type: "tel", autoComplete: "tel", inputMode: "tel", maxLength: LIMITS.phone })} />
           </Field>
         </div>
@@ -99,11 +102,11 @@ export function CustomerStep({ errors }: { errors: Errors }) {
 
       {/* Retrait */}
       <fieldset>
-        <legend className="mb-5 font-serif text-[1.75rem] leading-tight">Le retrait</legend>
+        <legend className="mb-5 font-serif text-[1.75rem] leading-tight">{tc.pickupLegend}</legend>
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
           <div>
             <p id="f-pickupDate-label" className="mb-2 text-sm font-semibold text-chocolate">
-              Date souhaitée de retrait
+              {tc.date}
             </p>
             <PickupCalendar
               value={customer.pickupDate}
@@ -120,17 +123,16 @@ export function CustomerStep({ errors }: { errors: Errors }) {
                 </p>
               ) : customer.pickupDate ? (
                 <p id="f-pickupDate-hint" className="mt-3 text-sm text-chocolate">
-                  Retrait le <strong className="font-semibold">{formatDateLong(customer.pickupDate)}</strong>
+                  {tc.pickupOn} <strong className="font-semibold">{formatDateLong(customer.pickupDate, locale)}</strong>
                   {dateStatus === "short-notice" && (
                     <span className="mt-1 block text-xs text-cocoa">
-                      Pour une création élaborée, nous vous conseillons de commander {site.recommendedLeadDays} jours à l&apos;avance.
-                      Roza Bakery vous confirmera la disponibilité.
+                      {tc.shortNotice(site.recommendedLeadDays)}
                     </span>
                   )}
                 </p>
               ) : (
                 <p id="f-pickupDate-hint" className="mt-2 text-xs text-cocoa">
-                  Les dates à moins de {site.minLeadDays} jours ne peuvent pas être sélectionnées.
+                  {tc.dateHint(site.minLeadDays)}
                 </p>
               )}
             </div>
@@ -139,7 +141,7 @@ export function CustomerStep({ errors }: { errors: Errors }) {
           <div className="space-y-8">
             <div role="radiogroup" aria-labelledby="f-pickupSlot-label" aria-describedby={describe("f-pickupSlot", errors.pickupSlot)}>
               <p id="f-pickupSlot-label" className="mb-2 text-sm font-semibold text-chocolate">
-                Créneau souhaité
+                {tc.slot}
               </p>
               <div className="grid grid-cols-2 gap-2.5">
                 {site.pickupSlots.map((slot) => {
@@ -168,11 +170,11 @@ export function CustomerStep({ errors }: { errors: Errors }) {
               )}
             </div>
 
-            <Field id="f-servings" label="Nombre de personnes" error={errors.servings}>
+            <Field id="f-servings" label={tc.servings} error={errors.servings}>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  aria-label="Retirer une personne"
+                  aria-label={tc.minus}
                   onClick={() => updateCustomer({ servings: String(Math.max(1, servings - 1)) })}
                   className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-chocolate/15 bg-paper transition active:scale-90 hover:border-chocolate/40"
                 >
@@ -184,13 +186,13 @@ export function CustomerStep({ errors }: { errors: Errors }) {
                     inputMode: "numeric",
                     min: 1,
                     max: LIMITS.servingsMax,
-                    placeholder: "Ex. 12",
+                    placeholder: tc.servingsPlaceholder,
                   })}
                   className="field text-center font-serif !text-2xl"
                 />
                 <button
                   type="button"
-                  aria-label="Ajouter une personne"
+                  aria-label={tc.plus}
                   onClick={() => updateCustomer({ servings: String(Math.min(LIMITS.servingsMax, servings + 1)) })}
                   className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-chocolate/15 bg-paper transition active:scale-90 hover:border-chocolate/40"
                 >
@@ -204,13 +206,13 @@ export function CustomerStep({ errors }: { errors: Errors }) {
 
       {/* Message + photos */}
       <fieldset className="space-y-6">
-        <legend className="mb-5 font-serif text-[1.75rem] leading-tight">Vos précisions</legend>
-        <Field id="f-message" label="Message / précisions (facultatif)" error={errors.message}>
+        <legend className="mb-5 font-serif text-[1.75rem] leading-tight">{tc.detailsLegend}</legend>
+        <Field id="f-message" label={tc.message} error={errors.message}>
           <textarea
             id="f-message"
             rows={4}
             className="field resize-y"
-            placeholder="L'occasion, un texte à inscrire, une allergie à signaler…"
+            placeholder={tc.messagePlaceholder}
             value={customer.message}
             maxLength={LIMITS.message}
             onChange={(e) => updateCustomer({ message: e.target.value })}
@@ -220,8 +222,8 @@ export function CustomerStep({ errors }: { errors: Errors }) {
           files={photos}
           onChange={setPhotos}
           max={site.maxInspirationPhotos}
-          title="Des photos d'inspiration ?"
-          description="Ajoutez ou complétez vos inspirations : elles accompagneront votre demande."
+          title={t.photos.titleInfo}
+          description={t.photos.descriptionInfo}
         />
       </fieldset>
     </div>

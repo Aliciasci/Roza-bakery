@@ -2,6 +2,8 @@
  * Gestion des dates de retrait (fuseau Europe/Paris), partagée client + serveur.
  * Toutes les dates sont manipulées au format "YYYY-MM-DD".
  */
+import { defaultLocale, type Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionaries";
 import type { SiteInfo } from "./types";
 
 const TIME_ZONE = "Europe/Paris";
@@ -62,20 +64,23 @@ export function checkPickupDate(
   return "ok";
 }
 
-export function formatDateLong(iso: string): string {
+/** Ex. « jeudi 8 octobre 2026 » / « Kuẓass 8 Tubeṛ 2026 » (noms issus du dictionnaire de la langue). */
+export function formatDateLong(iso: string, locale: Locale = defaultLocale): string {
   if (!isValidISODate(iso)) return iso;
-  return new Intl.DateTimeFormat("fr-FR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(parseISO(iso));
+  const d = parseISO(iso);
+  const { dates } = getDictionary(locale);
+  return dates.long(dates.weekdays[d.getUTCDay()], d.getUTCDate(), dates.months[d.getUTCMonth()], d.getUTCFullYear());
+}
+
+/** Ex. « octobre 2026 » */
+export function formatMonthYear(isoMonth: string, locale: Locale = defaultLocale): string {
+  const d = parseISO(`${isoMonth.slice(0, 7)}-01`);
+  const { dates } = getDictionary(locale);
+  return dates.monthYear(dates.months[d.getUTCMonth()], d.getUTCFullYear());
 }
 
 export function formatDateShort(iso: string): string {
   if (!isValidISODate(iso)) return iso;
-  return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" }).format(
-    parseISO(iso),
-  );
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}/${y}`;
 }

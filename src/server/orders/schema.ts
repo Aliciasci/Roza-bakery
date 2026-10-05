@@ -12,6 +12,7 @@ export const orderPayloadSchema = z.object({
   customValues: z.record(z.string().max(80), z.string().max(LIMITS.custom)).default({}),
   variants: z.record(z.string().max(80), z.string().max(80)).default({}),
   notes: notes.default({}),
+  locale: z.enum(["fr", "kab"]).default("fr"),
   customer: z.object({
     firstName: z.string().trim().max(LIMITS.name),
     lastName: z.string().trim().max(LIMITS.name),

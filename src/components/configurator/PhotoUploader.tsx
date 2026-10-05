@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState } from "react";
 import { CloseIcon, ImageIcon } from "@/components/ui/Icons";
+import { useI18n } from "@/i18n/client";
 import { useObjectUrls } from "./useObjectUrls";
 
 export const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
@@ -19,9 +20,11 @@ export function PhotoUploader({
   files,
   onChange,
   max,
-  title = "Vous avez une inspiration ?",
-  description = "Envoyez-nous une photo ou une inspiration pour nous montrer ce que vous imaginez.",
+  title,
+  description,
 }: Props) {
+  const { t } = useI18n();
+  const tp = t.photos;
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -37,18 +40,18 @@ export function PhotoUploader({
     const valid: File[] = [];
     for (const f of incoming) {
       if (f.type && !ACCEPTED.includes(f.type)) {
-        setError("Seules les images sont acceptées (JPG, PNG, WEBP, HEIC).");
+        setError(tp.onlyImages);
         continue;
       }
       if (f.size > MAX_PHOTO_BYTES) {
-        setError("Une image dépasse 8 Mo et n'a pas été ajoutée.");
+        setError(tp.tooBig);
         continue;
       }
       if (files.some((existing) => existing.name === f.name && existing.size === f.size)) continue;
       valid.push(f);
     }
     const next = [...files, ...valid];
-    if (next.length > max) setError(`${max} photos maximum.`);
+    if (next.length > max) setError(tp.max(max));
     onChange(next.slice(0, max));
     if (inputRef.current) inputRef.current.value = "";
   }
@@ -57,9 +60,9 @@ export function PhotoUploader({
 
   return (
     <div className="rounded-[1.6rem] border border-chocolate/12 bg-paper/70 p-5 md:p-7">
-      <p className="script text-3xl leading-none text-rose-deep">inspiration</p>
-      <h3 className="mt-2 text-[1.6rem] leading-tight">{title}</h3>
-      <p className="mt-2 max-w-lg text-sm leading-relaxed text-cocoa">{description}</p>
+      <p className="script text-3xl leading-none text-rose-deep">{tp.script}</p>
+      <h3 className="mt-2 text-[1.6rem] leading-tight">{title ?? tp.title}</h3>
+      <p className="mt-2 max-w-lg text-sm leading-relaxed text-cocoa">{description ?? tp.description}</p>
 
       <div
         onDragOver={(e) => {
@@ -93,9 +96,9 @@ export function PhotoUploader({
           }`}
         >
           <ImageIcon className="h-6 w-6 text-cocoa" />
-          <span className="text-sm font-semibold text-chocolate">Ajouter des photos</span>
+          <span className="text-sm font-semibold text-chocolate">{tp.add}</span>
           <span className="text-xs text-cocoa">
-            {remaining > 0 ? `Jusqu'à ${max} images · 8 Mo max chacune` : "Nombre maximum atteint"}
+            {remaining > 0 ? tp.upTo(max) : tp.maxReached}
           </span>
         </label>
       </div>
@@ -107,16 +110,16 @@ export function PhotoUploader({
       )}
 
       {previews.length > 0 && (
-        <ul className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-5" aria-label="Photos ajoutées">
+        <ul className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-5" aria-label={tp.listLabel}>
           {previews.map(({ file, url }, i) => (
             <li key={`${file.name}-${file.size}`} className="relative animate-fade-up">
               {/* eslint-disable-next-line @next/next/no-img-element -- aperçu local (blob) */}
-              <img src={url} alt={`Inspiration ${i + 1}`} className="aspect-square w-full rounded-xl object-cover" />
+              <img src={url} alt={tp.alt(i + 1)} className="aspect-square w-full rounded-xl object-cover" />
               <button
                 type="button"
                 onClick={() => onChange(files.filter((f) => f !== file))}
                 className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-chocolate text-cream shadow-md transition-transform active:scale-90"
-                aria-label={`Retirer la photo ${i + 1}`}
+                aria-label={tp.remove(i + 1)}
               >
                 <CloseIcon className="h-3.5 w-3.5" />
               </button>

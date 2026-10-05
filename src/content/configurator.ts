@@ -1,4 +1,5 @@
 import type { CompositionStep } from "@/lib/types";
+import { groupsKab, optionsKab, stepsKab } from "./kab";
 
 /**
  * Les étapes du configurateur « Composer mon gâteau ».
@@ -9,7 +10,7 @@ import type { CompositionStep } from "@/lib/types";
  * - Ajouter une photo : `image: "/images/options/xxx.jpg"`.
  * - Aucun prix ici : le tarif est confirmé par Roza Bakery après étude.
  */
-export const compositionSteps: CompositionStep[] = [
+const baseSteps: CompositionStep[] = [
   {
     id: "base",
     name: "Les génoises",
@@ -237,3 +238,14 @@ export const compositionSteps: CompositionStep[] = [
     ],
   },
 ];
+
+/** Étapes + traductions kabyles par défaut (voir `./kab.ts`). */
+export const compositionSteps: CompositionStep[] = baseSteps.map((step) => ({
+  ...step,
+  ...(stepsKab[step.id] && { kab: stepsKab[step.id] }),
+  groups: step.groups.map((group) => ({
+    ...group,
+    ...(groupsKab[group.id] && { kab: groupsKab[group.id] }),
+    options: group.options.map((option) => ({ ...option, ...(optionsKab[option.id] && { kab: optionsKab[option.id] }) })),
+  })),
+}));

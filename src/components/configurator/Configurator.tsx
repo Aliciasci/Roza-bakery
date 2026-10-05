@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { ArrowLeftIcon, ChevronIcon, CloseIcon } from "@/components/ui/Icons";
+import { useI18n } from "@/i18n/client";
 import { missingVariants } from "@/lib/composition";
 import { validateCustomer, type FieldErrors } from "@/lib/validation";
 import type { CustomerInfo } from "@/lib/types";
@@ -14,12 +15,6 @@ import { CustomerStep } from "./CustomerStep";
 import { OptionStep } from "./OptionStep";
 import { StepProgress } from "./StepProgress";
 
-const INFO_STEP = {
-  name: "Informations de commande",
-  title: "Vos informations",
-  subtitle: "Dites-nous quand et pour combien de personnes. Roza Bakery reviendra vers vous pour confirmer.",
-};
-
 function readStepFromUrl(): number | null {
   const n = Number(new URLSearchParams(window.location.search).get("etape"));
   return Number.isInteger(n) && n >= 1 ? n - 1 : null;
@@ -27,6 +22,9 @@ function readStepFromUrl(): number | null {
 
 export function Configurator() {
   const router = useRouter();
+  const { t, href } = useI18n();
+  const tc = t.configurator;
+  const INFO_STEP = tc.infoStep;
   const ctx = useConfigurator();
   const { steps, draft, customer, site, stepIndex, maxReached, totalSteps, hydrated, goToStep } = ctx;
 
@@ -89,17 +87,12 @@ export function Configurator() {
   function next() {
     if (step) {
       if (step.required && !(draft.selections[step.id]?.length ?? 0)) {
-        setStepError("Merci de faire un choix pour continuer.");
+        setStepError(tc.chooseError);
         return;
       }
       const missing = missingVariants(step, draft);
       if (missing.length) {
-        const label = (missing[0].variantsLabel ?? "saveur").toLowerCase();
-        setStepError(
-          missing.length === 1
-            ? `Choisissez la ${label} pour « ${missing[0].label} ».`
-            : `Choisissez la ${label} pour : ${missing.map((o) => o.label).join(", ")}.`,
-        );
+        setStepError(tc.flavorError(missing[0].variantsLabel ?? tc.flavorDefault, missing.map((o) => o.label)));
         requestAnimationFrame(() =>
           document.querySelector("[data-flavor-missing]")?.scrollIntoView({ behavior: "smooth", block: "center" }),
         );
@@ -108,7 +101,7 @@ export function Configurator() {
       changeStep(stepIndex + 1);
       return;
     }
-    const errors = validateCustomer(customer, site);
+    const errors = validateCustomer(customer, site, undefined, t.validation);
     setCustomerErrors(errors);
     const firstKey = Object.keys(errors)[0];
     if (firstKey) {
@@ -117,7 +110,7 @@ export function Configurator() {
       if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) el.focus({ preventScroll: true });
       return;
     }
-    router.push("/composer/recapitulatif");
+    router.push(href("/composer/recapitulatif"));
   }
 
   function back() {
@@ -128,7 +121,7 @@ export function Configurator() {
   useEffect(() => {
     setCustomerErrors((prev) => {
       if (!Object.keys(prev).length) return prev;
-      const now = validateCustomer(customer, site);
+      const now = validateCustomer(customer, site, undefined, t.validation);
       const kept: typeof prev = {};
       for (const k of Object.keys(prev) as (keyof CustomerInfo)[]) if (now[k]) kept[k] = now[k];
       return kept;
@@ -146,10 +139,10 @@ export function Configurator() {
 
   const hasSelection = step ? (draft.selections[step.id]?.length ?? 0) > 0 : true;
   const continueLabel = isInfoStep
-    ? "Voir mon récapitulatif"
+    ? tc.toRecap
     : step && !step.required && !hasSelection
-      ? "Passer cette étape"
-      : "Continuer";
+      ? tc.skip
+      : tc.continue;
   const choicesCount = Object.values(draft.selections).reduce((n, ids) => n + (ids?.length ?? 0), 0);
 
   if (!hydrated) {
@@ -167,7 +160,7 @@ export function Configurator() {
   return (
     <>
       <div className="container-page pb-48 pt-4 md:pt-8 lg:pb-28">
-        <h1 className="sr-only">Composer mon gâteau</h1>
+        <h1 className="sr-only">{tc.srTitle}</h1>
         <div className="lg:grid lg:grid-cols-12 lg:gap-12 xl:gap-16">
           <div className="lg:col-span-8">
             <div className="sticky top-16 z-20 -mx-5 bg-cream/92 px-5 pb-2 pt-2 backdrop-blur-md md:top-20 md:-mx-10 md:px-10 lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:backdrop-blur-none">
@@ -194,7 +187,7 @@ export function Configurator() {
                   {subtitle}
                   {step && !step.required && (
                     <span className="ml-2 whitespace-nowrap text-[0.6875rem] uppercase tracking-[0.14em] text-cocoa-light md:mt-2 md:ml-0 md:block md:text-xs md:tracking-[0.16em]">
-                      Facultatif
+                      {tc.optionalTag}
                     </span>
                   )}
                 </p>
@@ -205,7 +198,7 @@ export function Configurator() {
               {/* Navigation desktop */}
               <div className="mt-14 hidden items-center justify-between border-t border-chocolate/10 pt-8 lg:flex">
                 <Button variant="ghost" onClick={back} disabled={stepIndex === 0} className="!px-0">
-                  <ArrowLeftIcon className="h-4 w-4" /> Retour
+                  <ArrowLeftIcon className="h-4 w-4" /> {tc.back}
                 </Button>
                 <Button size="lg" arrow onClick={next}>
                   {continueLabel}
@@ -214,7 +207,7 @@ export function Configurator() {
             </div>
           </div>
 
-          <aside className="hidden lg:col-span-4 lg:block" aria-label="Résumé de ma création">
+          <aside className="hidden lg:col-span-4 lg:block" aria-label={tc.summaryAria}>
             <div className="sticky top-28 max-h-[calc(100dvh-8rem)] overflow-y-auto rounded-[2rem] bg-paper p-7 shadow-[0_30px_60px_-40px_rgba(58,37,32,0.45)] ring-1 ring-chocolate/5 no-scrollbar">
               <ConfiguratorSummary onSelectStep={(i) => changeStep(i)} />
             </div>
@@ -235,9 +228,9 @@ export function Configurator() {
               <CakeCrossSection tones={computeCakeTones(steps, draft)} className="h-full w-full" />
             </span>
             <span className="flex-1 text-sm font-semibold text-chocolate">
-              Ma création
+              {tc.myCreation}
               <span className="ml-2 rounded-full bg-rose px-2 py-0.5 text-[0.6875rem] font-semibold">
-                {choicesCount} choix
+                {tc.choices(choicesCount)}
               </span>
             </span>
             <ChevronIcon className="h-4 w-4 rotate-180 text-cocoa" />
@@ -247,7 +240,7 @@ export function Configurator() {
               type="button"
               onClick={back}
               disabled={stepIndex === 0}
-              aria-label="Étape précédente"
+              aria-label={tc.prevStep}
               className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-chocolate/20 transition active:scale-95 disabled:opacity-30"
             >
               <ArrowLeftIcon className="h-5 w-5" />
@@ -274,6 +267,8 @@ function SummarySheet({
   onSelectStep: (index: number) => void;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const { t } = useI18n();
+  const tc = t.configurator;
 
   useEffect(() => {
     if (!open) return;
@@ -293,7 +288,7 @@ function SummarySheet({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true" aria-label="Résumé de ma création">
+    <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true" aria-label={tc.summaryAria}>
       <div className="absolute inset-0 animate-fade-in bg-chocolate/35 backdrop-blur-[2px]" onClick={onClose} />
       <div className="absolute inset-x-0 bottom-0 max-h-[88dvh] animate-sheet-in overflow-y-auto rounded-t-[2rem] bg-cream px-5 pb-safe pt-3 shadow-2xl">
         <div className="sticky top-0 z-10 -mx-5 flex justify-center bg-cream px-5 pb-2">
@@ -302,7 +297,7 @@ function SummarySheet({
             ref={closeRef}
             type="button"
             onClick={onClose}
-            aria-label="Fermer le résumé"
+            aria-label={t.configurator.closeSummary}
             className="absolute right-3 top-0 flex h-11 w-11 items-center justify-center rounded-full"
           >
             <CloseIcon className="h-5 w-5" />

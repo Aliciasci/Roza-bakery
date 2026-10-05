@@ -3,19 +3,19 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 
 interface Props {
   items: { title: string; text: string }[];
-  eyebrow?: string;
-  title?: React.ReactNode;
+  eyebrow: string;
+  title: React.ReactNode;
   className?: string;
 }
 
-export function HowItWorks({ items, eyebrow = "Simple et sur mesure", title, className = "" }: Props) {
+export function HowItWorks({ items, eyebrow, title, className = "" }: Props) {
   return (
     <section className={`py-24 md:py-32 ${className}`} aria-labelledby="how-title">
       <div className="container-page">
         <SectionHeading
           align="center"
           eyebrow={eyebrow}
-          title={<span id="how-title">{title ?? <>Comment ça <em>marche</em></>}</span>}
+          title={<span id="how-title">{title}</span>}
         />
         <ol
           className={`relative mt-16 grid gap-10 sm:grid-cols-2 lg:gap-8 ${

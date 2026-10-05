@@ -14,7 +14,9 @@ export function optionDisplayLabel(
   customValues: Record<string, string>,
   variants: Record<string, string> = {},
 ): string {
-  const variant = option.variants?.length ? variants[option.id] : undefined;
+  const chosen = option.variants?.length ? variants[option.id] : undefined;
+  // La valeur enregistrée est la saveur française ; on affiche son libellé traduit s'il existe
+  const variant = chosen ? (option.variantLabels?.[option.variants!.indexOf(chosen)] ?? chosen) : undefined;
   const custom = customValues[option.id]?.trim();
   let label = variant ? `${option.label} — ${variant}` : option.label;
   if (option.custom && custom) label += ` : ${custom}`;

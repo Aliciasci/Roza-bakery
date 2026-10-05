@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
 
-/** Affiche une valeur réelle, ou un placeholder clairement identifié si l'information manque. */
-export function OrPlaceholder({ value, label }: { value: ReactNode | null | undefined; label: string }) {
+/**
+ * Affiche une valeur réelle, ou un texte de remplacement clairement identifié
+ * si l'information manque (ex. « [Adresse à compléter] »).
+ */
+export function OrPlaceholder({ value, placeholder }: { value: ReactNode | null | undefined; placeholder: string }) {
   if (value !== null && value !== undefined && value !== "") return <>{value}</>;
-  return <span className="placeholder-text">[{label} à compléter]</span>;
+  return <span className="placeholder-text">{placeholder}</span>;
 }

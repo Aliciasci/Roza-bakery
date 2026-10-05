@@ -1,6 +1,7 @@
 import type { Creation, CreationCategoryInfo } from "@/lib/types";
+import { categoriesKab, creationPlaceholderKab } from "./kab";
 
-export const creationCategories: CreationCategoryInfo[] = [
+const baseCategories: CreationCategoryInfo[] = [
   { id: "wedding", label: "Wedding" },
   { id: "birthday", label: "Birthday" },
   { id: "cake-design", label: "Cake design" },
@@ -19,7 +20,7 @@ export const creationCategories: CreationCategoryInfo[] = [
  *   2. renseigner `image`, `name`, `description`
  *   3. supprimer `placeholder: true`
  */
-export const creations: Creation[] = [
+const baseCreations: Creation[] = [
   { id: "c01", name: "Création à venir", description: "Photo et description à ajouter.", categories: ["wedding", "floral"], ratio: "tall", tone: "white", placeholder: true },
   { id: "c02", name: "Création à venir", description: "Photo et description à ajouter.", categories: ["birthday"], ratio: "square", tone: "rose", placeholder: true },
   { id: "c03", name: "Création à venir", description: "Photo et description à ajouter.", categories: ["chocolate", "minimal"], ratio: "portrait", tone: "cocoa", placeholder: true },
@@ -30,3 +31,7 @@ export const creations: Creation[] = [
   { id: "c08", name: "Création à venir", description: "Photo et description à ajouter.", categories: ["chocolate"], ratio: "square", tone: "chocolate", placeholder: true },
   { id: "c09", name: "Création à venir", description: "Photo et description à ajouter.", categories: ["custom", "cake-design"], ratio: "tall", tone: "golden", placeholder: true },
 ];
+
+export const creationCategories: CreationCategoryInfo[] = baseCategories.map((c) => ({ ...c, kab: categoriesKab[c.id] }));
+
+export const creations: Creation[] = baseCreations.map((c) => (c.placeholder ? { ...c, kab: creationPlaceholderKab } : c));
