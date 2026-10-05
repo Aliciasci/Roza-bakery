@@ -158,20 +158,29 @@ export function Configurator() {
             </div>
 
             <div key={stepIndex} className={direction === "next" ? "animate-step-in-next" : "animate-step-in-prev"}>
-              <header className="mb-10 mt-8 md:mb-12 md:mt-12">
-                <div className="flex items-end gap-4">
+              {/* Sur mobile, le numéro et le nom de l'étape sont déjà dans la barre de progression */}
+              <header className="mb-6 mt-4 md:mb-12 md:mt-12">
+                <div className="hidden items-end gap-4 md:flex">
                   <span aria-hidden className="font-serif text-[4.5rem] italic leading-[0.8] text-rose-deep/80 md:text-[6rem]">
                     {String(stepIndex + 1).padStart(2, "0")}
                   </span>
                   <p className="eyebrow pb-1.5">{step?.name ?? INFO_STEP.name}</p>
                 </div>
-                <h2 ref={headingRef} tabIndex={-1} className="mt-5 text-headline outline-none">
+                <h2
+                  ref={headingRef}
+                  tabIndex={-1}
+                  className="text-[1.75rem] leading-[1.1] tracking-[-0.01em] outline-none md:mt-5 md:text-headline"
+                >
                   {title}
                 </h2>
-                <p className="mt-4 max-w-xl text-[1.0625rem] leading-relaxed text-cocoa">{subtitle}</p>
-                {step && !step.required && (
-                  <p className="mt-2 text-xs uppercase tracking-[0.16em] text-cocoa-light">Étape facultative</p>
-                )}
+                <p className="mt-2 max-w-xl text-[0.9375rem] leading-snug text-cocoa md:mt-4 md:text-[1.0625rem] md:leading-relaxed">
+                  {subtitle}
+                  {step && !step.required && (
+                    <span className="ml-2 whitespace-nowrap text-[0.6875rem] uppercase tracking-[0.14em] text-cocoa-light md:mt-2 md:ml-0 md:block md:text-xs md:tracking-[0.16em]">
+                      Facultatif
+                    </span>
+                  )}
+                </p>
               </header>
 
               {step ? <OptionStep step={step} error={stepError} /> : <CustomerStep errors={customerErrors} />}

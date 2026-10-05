@@ -73,7 +73,7 @@ export function OptionCard({ option, stepId, mode, selected, variant, customValu
             </span>
           </>
         ) : (
-          <span className="relative flex min-h-[4.25rem] items-center gap-3 p-3 pr-9 sm:gap-3.5 sm:p-3.5 sm:pr-11">
+          <span className="relative flex min-h-[4.25rem] items-center gap-3 p-3 pr-10 sm:gap-3.5 sm:p-3.5 sm:pr-12">
             <OptionSwatch option={option} selected={selected} />
             <span className="min-w-0 flex-1">
               <span className="block font-serif text-[1.15rem] leading-tight text-chocolate sm:text-[1.2rem]">{option.label}</span>
