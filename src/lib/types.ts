@@ -4,7 +4,7 @@ import type { Locale } from "@/i18n/config";
  * Modèle de données central de Roza Bakery.
  *
  * Ces types décrivent tout ce qu'un futur back-office devra gérer :
- * options du configurateur, créations, FAQ, informations de la boutique,
+ * options du configurateur, créations, FAQ, informations de la pâtisserie,
  * commandes. Les composants ne consomment que ces types — on peut donc
  * remplacer les fichiers `src/content/*` par une base de données ou un CMS
  * sans toucher à l'interface.

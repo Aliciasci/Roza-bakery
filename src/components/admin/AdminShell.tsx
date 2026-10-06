@@ -12,7 +12,7 @@ const nav = [
   { href: "/admin/photos", label: "Photos du site" },
   { href: "/admin/creations", label: "Créations" },
   { href: "/admin/faq", label: "FAQ" },
-  { href: "/admin/boutique", label: "Boutique" },
+  { href: "/admin/infos", label: "Infos & retrait" },
 ];
 
 export function AdminShell({ children, newOrders }: { children: ReactNode; newOrders: number }) {

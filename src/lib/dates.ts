@@ -48,7 +48,7 @@ export function minPickupDate(site: Pick<SiteInfo, "minLeadDays">, now?: Date): 
 
 export type PickupDateStatus = "ok" | "short-notice" | "too-soon" | "unavailable" | "invalid";
 
-/** Vérifie une date de retrait selon les règles de la boutique. */
+/** Vérifie une date de retrait selon les règles de retrait. */
 export function checkPickupDate(
   iso: string,
   site: Pick<SiteInfo, "minLeadDays" | "recommendedLeadDays" | "closedWeekdays" | "unavailableDates">,

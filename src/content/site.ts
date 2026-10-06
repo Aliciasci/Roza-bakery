@@ -2,7 +2,7 @@ import type { SiteInfo } from "@/lib/types";
 import { siteKab, slotsKab } from "./kab";
 
 /**
- * Informations de la boutique.
+ * Informations de la pâtisserie (coordonnées, délais, retrait).
  *
  * ⚠️ PLACEHOLDERS — Toutes les valeurs `null` sont des informations réelles
  * qui n'ont pas encore été fournies. Elles s'affichent sur le site comme

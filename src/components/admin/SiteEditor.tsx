@@ -36,7 +36,7 @@ export function SiteEditor({ initial }: { initial: SiteInfo }) {
 
   return (
     <>
-      <PageTitle title="Boutique" intro="Coordonnées affichées sur le site, délais de commande et disponibilités de retrait.">
+      <PageTitle title="Infos & retrait" intro="Coordonnées affichées sur le site, délais de commande et disponibilités de retrait.">
         <LangTabs value={lang} onChange={setLang} />
       </PageTitle>
 
@@ -104,7 +104,7 @@ export function SiteEditor({ initial }: { initial: SiteInfo }) {
 
         <Card>
           <h2 className="font-serif text-2xl">Jours de retrait</h2>
-          <p className="mt-1 text-sm text-cocoa">Décochez les jours où la boutique est fermée : ils ne pourront pas être choisis.</p>
+          <p className="mt-1 text-sm text-cocoa">Décochez les jours où la pâtisserie est fermée : ils ne pourront pas être choisis.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             {weekOrder.map((d) => {
               const open = !site.closedWeekdays.includes(d);

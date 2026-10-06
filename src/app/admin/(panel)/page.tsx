@@ -24,7 +24,7 @@ export default async function DashboardPage() {
     { href: "/admin/configurateur", title: "Configurateur", text: `${optionCount} options — crèmes, inserts, fruits…` },
     { href: "/admin/creations", title: "Créations", text: `${content.creations.length} créations dans la galerie` },
     { href: "/admin/faq", title: "FAQ", text: `${content.faq.length} questions` },
-    { href: "/admin/boutique", title: "Boutique", text: "Coordonnées, délais, créneaux, congés" },
+    { href: "/admin/infos", title: "Infos & retrait", text: "Coordonnées, horaires, délais, créneaux, congés" },
   ];
 
   return (

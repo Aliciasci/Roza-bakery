@@ -72,7 +72,7 @@ Chaque `git push` sur `main` redéploie automatiquement. Le volume, lui, est con
 | **Photos du site** | Grande photo de l'accueil, portrait de la page À propos, avec leur description |
 | **Créations** | Galerie : photo, nom, description, catégories, format, ordre, badge « Exemple ». Gestion des catégories (filtres) |
 | **FAQ** | Questions et réponses, ordre, réponses « à compléter » |
-| **Boutique** | Coordonnées, Instagram, horaires, délais (minimum / conseillé), jours fermés, **dates indisponibles** (congés), créneaux de retrait, nombre maximum de photos |
+| **Infos & retrait** | Coordonnées, Instagram, horaires, délais (minimum / conseillé), jours fermés, **dates indisponibles** (congés), créneaux de retrait, nombre maximum de photos |
 
 Chaque modification est validée côté serveur, puis le site public est régénéré immédiatement.
 Une barre « Modifications non enregistrées » évite de perdre une saisie.
