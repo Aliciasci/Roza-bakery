@@ -14,7 +14,7 @@ export async function CreationsPreview() {
   const galleryHref = localizePath("/creations", locale);
 
   return (
-    <section className="py-24 md:py-32" aria-labelledby="creations-title">
+    <section className="bg-ivory pb-20 pt-14 md:pb-28 md:pt-20" aria-labelledby="creations-title">
       <div className="container-page">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <SectionHeading

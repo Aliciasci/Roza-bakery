@@ -31,7 +31,7 @@ export async function Hero({ image, imageAlt }: { image?: string; imageAlt?: str
       {/* Halo discret */}
       <div aria-hidden className="absolute -right-40 top-0 -z-10 h-[38rem] w-[38rem] rounded-full bg-rose/30 blur-3xl" />
 
-      <div className="container-page grid gap-12 pb-20 pt-6 md:pt-12 lg:min-h-[calc(100dvh-5rem)] lg:grid-cols-12 lg:items-center lg:gap-8 lg:pb-24">
+      <div className="container-page grid gap-12 pb-16 pt-6 md:pt-12 lg:min-h-[calc(100dvh-5rem)] lg:grid-cols-12 lg:items-center lg:gap-8 lg:pb-16">
         <div className="lg:col-span-6 lg:pr-6">
           <p className="eyebrow flex animate-fade-up items-center gap-3">
             <span aria-hidden className="h-px w-8 bg-chocolate/30" />
