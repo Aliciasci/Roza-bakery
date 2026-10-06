@@ -54,6 +54,10 @@ export function computeCakeTones(steps: CompositionStep[], draft: CompositionDra
 /* -------------------------------------------------------------------------- */
 
 const mix = mixColors;
+const luminance = (hex: string) => {
+  const n = parseInt(hex.slice(1, 7), 16);
+  return (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+};
 const darken = (c: string, t: number) => mix(c, "#2a1712", t);
 const lighten = (c: string, t: number) => mix(c, "#ffffff", t);
 
@@ -109,7 +113,7 @@ function crunchKind(it: CakeItem): Crunch {
   return "nut";
 }
 
-type Deco = "border" | "pearls" | "flowers" | "topper" | "bow" | "gold" | "sprinkles";
+type Deco = "writing" | "border" | "pearls" | "flowers" | "topper" | "bow" | "gold" | "sprinkles";
 function decoKinds(items: CakeItem[]): Set<Deco> {
   const s = new Set<Deco>();
   for (const { id, tone } of items) {
@@ -118,8 +122,8 @@ function decoKinds(items: CakeItem[]): Set<Deco> {
     else if (/modelage/.test(id) || tone === "custard") s.add("bow");
     else if (/cake-design/.test(id) || tone === "raspberry") s.add("gold").add("flowers");
     else if (/elabor/.test(id) || tone === "rose") s.add("border").add("pearls");
-    else if (/perso/.test(id) || tone === "neutral") s.add("border").add("sprinkles");
-    else s.add("border");
+    else if (/perso/.test(id) || tone === "neutral") s.add("writing").add("sprinkles");
+    else s.add("writing");
   }
   return s;
 }
@@ -129,10 +133,10 @@ function decoKinds(items: CakeItem[]): Set<Deco> {
 /* -------------------------------------------------------------------------- */
 
 const CX = 160;
-const R = 112; // rayon
-const RY = 30; // rayon apparent en profondeur
-const TOP = 104;
-const H = 120;
+const R = 96; // rayon
+const RY = 34; // rayon apparent en profondeur
+const TOP = 150;
+const H = 84; // bento : plus large que haut
 const BOT = TOP + H;
 const CUT_R = 55; // angles de la part retirée (0° = droite, 90° = avant)
 const CUT_L = 125;
@@ -147,11 +151,26 @@ const sidePath = (a: number, b: number) =>
 const SIDES = [sidePath(0, CUT_R), sidePath(CUT_L, 180)];
 const rimArc = (a: number, b: number, y: number) => `M${P(a, y)} A${R} ${RY} 0 0 1 ${P(b, y)}`;
 
-/** Face coupée en coordonnées locales : u de 0 (centre) à 100 (bord), v de 0 (dessus) à 120 (dessous). */
+/** Face coupée en coordonnées locales : u de 0 (centre) à 100 (bord), v de 0 (dessus) à H (dessous). */
 const faceMatrix = (deg: number) => `matrix(${f((R * Math.cos(rad(deg))) / 100)} ${f((RY * Math.sin(rad(deg))) / 100)} 0 1 ${CX} ${TOP})`;
 
 /* Couches de la face coupée (v) */
-const V = { s3: 5, c2: [31, 47], s2: 47, c1: [73, 89], crunch: [89, 94] } as const;
+const V = { s3: 4, c2: [22, 34], s2: 34, c1: [50, 64], crunch: [64, 68] } as const;
+
+/* Boîte bento en kraft : fond, parois basses, couvercle ouvert derrière */
+const BOX_S = R + 28; // demi-côté
+const BOX_K = RY / R; // aplatissement de la perspective
+const BOX = {
+  l: CX - BOX_S,
+  r: CX + BOX_S,
+  back: BOT - BOX_S * BOX_K,
+  front: BOT + BOX_S * BOX_K,
+  wall: 9,
+  lid: 120,
+};
+const KRAFT = "#c9a27a";
+const KRAFT_IN = "#dcc09a";
+const KRAFT_DARK = "#a97f55";
 
 /** Bande irrégulière (crème, insert) — bord légèrement ondulé comme une vraie coupe. */
 function band(v0: number, v1: number, u1: number, amp: number, rnd: () => number, roundEnd = false) {
@@ -313,6 +332,16 @@ function Rosette({ x, y, color }: { x: number; y: number; color: string }) {
   );
 }
 
+function Shell({ x, y, angle, color }: { x: number; y: number; angle: number; color: string }) {
+  return (
+    <g transform={`translate(${f(x)} ${f(y)}) rotate(${f(angle)})`}>
+      <path d="M-3.6 0.3C-3.4 -2.8 1.8 -3 3.8 0.2C1.8 2.6 -3.4 2.8 -3.6 0.3Z" fill={color} stroke={darken(color, 0.16)} strokeWidth="0.35" />
+      <path d="M-2.4 -0.4C-0.6 -1.6 1.4 -1.2 2.6 0" stroke={darken(color, 0.2)} strokeWidth="0.35" fill="none" />
+      <path d="M-2.2 -1.2C-0.8 -2 0.8 -1.8 1.8 -0.9" stroke="#fff" strokeWidth="0.5" fill="none" opacity="0.5" />
+    </g>
+  );
+}
+
 const EMPTY_SPONGE = "#efe4d3";
 const EMPTY_CREAM = "#f8f2ea";
 const EMPTY_FINISH = "#f6efe5";
@@ -347,8 +376,8 @@ export function CakeCrossSection({ tones, className = "" }: { tones: CakeTones; 
       : [[95, 100.5, exterior]];
   const topLayers: [number, number, string][] =
     finish === "fondant"
-      ? [[-0.5, 1.8, exterior], [1.8, 5, GANACHE]]
-      : [[-0.5, 5, exterior]];
+      ? [[-0.5, 1.6, exterior], [1.6, 4, GANACHE]]
+      : [[-0.5, 4, exterior]];
 
   const poreTile: [number, number] = sponged === "molly" ? [13, 9] : sponged === "dacquoise" ? [19, 13] : [29, 19];
   const pores = (() => {
@@ -375,7 +404,7 @@ export function CakeCrossSection({ tones, className = "" }: { tones: CakeTones; 
       for (let i = 0, u = fruitsU0; u <= 88; i++, u += 10.5) {
         const n = i % cycles.length;
         const cycle = cycles[n];
-        fruitPieces.push({ kind: cycle[Math.floor(i / cycles.length) % cycle.length], color: tones.fruits[n].color, u, v: 81 + (rnd() - 0.5) * 2.4 });
+        fruitPieces.push({ kind: cycle[Math.floor(i / cycles.length) % cycle.length], color: tones.fruits[n].color, u, v: (V.c1[0] + V.c1[1]) / 2 + (rnd() - 0.5) * 1.6 });
       }
     }
     const crunchBits = tones.croustillant.flatMap((it, n) =>
@@ -385,7 +414,7 @@ export function CakeCrossSection({ tones, className = "" }: { tones: CakeTones; 
             kind: crunchKind(it),
             color: it.color,
             u: ((i * tones.croustillant.length + n) * 3.4 + rnd() * 2) % 94,
-            v: 89.4 + rnd() * 4.4,
+            v: V.crunch[0] + 0.4 + rnd() * 3.4,
             r: rnd() * 360,
             s: 0.8 + rnd() * 0.6,
           })),
@@ -395,12 +424,12 @@ export function CakeCrossSection({ tones, className = "" }: { tones: CakeTones; 
     return (
       <g transform={faceMatrix(side === "r" ? CUT_R : CUT_L)}>
         {/* Génoise : fond + mie alvéolée */}
-        <rect x="-0.5" y="0" width="101" height="120" fill={sponge} className="transition-[fill] duration-500" />
+        <rect x="-0.5" y="0" width="101" height={H} fill={sponge} className="transition-[fill] duration-500" />
         {!ghost && (
           <>
-            <rect x="-0.5" y="0" width="101" height="120" fill={url("pores")} />
-            <rect x="-0.5" y="0" width="101" height="120" fill={url("pores")} transform="translate(7 5) scale(0.7)" opacity="0.6" />
-            <rect x="-0.5" y="0" width="101" height="120" fill={url("specks")} opacity="0.5" />
+            <rect x="-0.5" y="0" width="101" height={H} fill={url("pores")} />
+            <rect x="-0.5" y="0" width="101" height={H} fill={url("pores")} transform="translate(7 5) scale(0.7)" opacity="0.6" />
+            <rect x="-0.5" y="0" width="101" height={H} fill={url("specks")} opacity="0.5" />
             {/* Croûte dorée en haut de chaque couche (dacquoise, molly) */}
             {sponged !== "genoise" &&
               [V.s3, V.s2, spongeBottom].map((v) => (
@@ -408,7 +437,7 @@ export function CakeCrossSection({ tones, className = "" }: { tones: CakeTones; 
               ))}
             {sponged === "dacquoise" &&
               Array.from({ length: 22 }, (_, i) => {
-                const v = [V.s3, V.s2, spongeBottom][i % 3] + 5 + rnd() * 18;
+                const v = [V.s3, V.s2, spongeBottom][i % 3] + 3 + rnd() * 11;
                 return <ellipse key={i} cx={f(rnd() * 94)} cy={f(v)} rx="1.6" ry="0.55" transform={`rotate(${f(rnd() * 50 - 25)} ${f(rnd() * 94)} ${f(v)})`} fill="#f4e6c8" stroke={darken(sponge, 0.2)} strokeWidth="0.25" />;
               })}
           </>
@@ -438,7 +467,7 @@ export function CakeCrossSection({ tones, className = "" }: { tones: CakeTones; 
 
         {/* Inserts (plus petits que le gâteau, centrés) */}
         {tones.inserts.slice(0, 2).map((it, i) => {
-          const [v0, v1, u1] = i === 0 ? [V.c2[0] + 3.5, V.c2[1] - 4, 70] : [V.c1[0] + 3.5, V.c1[1] - 4.5, 44];
+          const [v0, v1, u1] = i === 0 ? [V.c2[0] + 3, V.c2[1] - 3, 70] : [V.c1[0] + 3, V.c1[1] - 4, 44];
           const gel = GEL_TONES.includes(it.tone as Tone);
           return (
             <g key={it.id} className="animate-fade-in">
@@ -454,7 +483,7 @@ export function CakeCrossSection({ tones, className = "" }: { tones: CakeTones; 
 
         {/* Fruits frais coupés dans la crème */}
         {fruitPieces.map((p, i) => (
-          <g key={i} transform={`translate(${f(p.u)} ${f(p.v)}) scale(1.35 1)`} className="animate-pop" style={{ animationDelay: `${i * 35}ms`, transformBox: "fill-box", transformOrigin: "center" }}>
+          <g key={i} transform={`translate(${f(p.u)} ${f(p.v)}) scale(1.15 0.85)`} className="animate-pop" style={{ animationDelay: `${i * 35}ms`, transformBox: "fill-box", transformOrigin: "center" }}>
             <FruitPiece kind={p.kind} color={p.color} />
           </g>
         ))}
@@ -492,13 +521,13 @@ export function CakeCrossSection({ tones, className = "" }: { tones: CakeTones; 
         ))}
         {sauce && <path d={band(-0.5, 2.4, 100.5, 0.4, rnd)} fill={sauce} />}
         {rimLayers.map(([u0, u1, c]) => (
-          <rect key={`r${u0}`} x={u0} y="-0.5" width={u1 - u0} height="121" fill={c} />
+          <rect key={`r${u0}`} x={u0} y="-0.5" width={u1 - u0} height={H + 1} fill={c} />
         ))}
 
         {/* Lumière : face de droite éclairée, face de gauche dans l'ombre */}
-        <rect x="-0.5" y="-0.5" width="101.5" height="121" fill={url("faceShade")} />
-        <rect x="-0.5" y="-0.5" width="101.5" height="121" fill={side === "r" ? "#fff" : "#2a1712"} opacity={side === "r" ? 0.04 : 0.1} />
-        {ghost && <path d="M0 0H100V120H0Z" fill="none" stroke={outline} strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />}
+        <rect x="-0.5" y="-0.5" width="101.5" height={H + 1} fill={url("faceShade")} />
+        <rect x="-0.5" y="-0.5" width="101.5" height={H + 1} fill={side === "r" ? "#fff" : "#2a1712"} opacity={side === "r" ? 0.04 : 0.1} />
+        {ghost && <path d={`M0 0H100V${H}H0Z`} fill="none" stroke={outline} strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />}
       </g>
     );
   };
@@ -507,8 +536,8 @@ export function CakeCrossSection({ tones, className = "" }: { tones: CakeTones; 
   const goldFlakes = (() => {
     const r = rng(17);
     return Array.from({ length: 26 }, () => {
-      const cxg = CX - 96 + r() * 34;
-      const cyg = TOP + 18 + r() * 50 + (r() - 0.5) * 10;
+      const cxg = CX - 90 + r() * 32;
+      const cyg = TOP + 14 + r() * 40 + (r() - 0.5) * 8;
       const n = 6 + Math.floor(r() * 3);
       const size = 1.5 + r() * 4;
       const pts = Array.from({ length: n }, (_, k) => {
@@ -533,11 +562,34 @@ export function CakeCrossSection({ tones, className = "" }: { tones: CakeTones; 
   const backRosettes = rosettes.filter((r) => Math.sin(rad(r.a)) < 0);
   const frontRosettes = rosettes.filter((r) => Math.sin(rad(r.a)) >= 0);
 
+  // Bordures pochées (coquilles) en haut et en pied de gâteau, comme sur un bento cake
+  const shellColor = finish === "ganache" ? lighten(exterior, 0.12) : finish === "fondant" ? "#fbf4ea" : lighten(exterior, 0.2);
+  const shell = (a: number, y: number, r: number, ry: number) => {
+    const [x, yy] = pt(a, y, r, ry);
+    const angle = (Math.atan2(ry * Math.cos(rad(a)), -r * Math.sin(rad(a))) * 180) / Math.PI;
+    return { a, x, y: yy, angle };
+  };
+  const topShells = tones.exterieur
+    ? Array.from({ length: 45 }, (_, i) => i * 8 + 2)
+        .filter((a) => a < CUT_R - 4 || a > CUT_L + 4)
+        .map((a) => shell(a, TOP + 0.5, R - 1.5, RY - 0.6))
+        .sort((p, q) => p.y - q.y)
+    : [];
+  const bottomShells = tones.exterieur
+    ? [...Array.from({ length: 7 }, (_, i) => 2 + i * 8), ...Array.from({ length: 7 }, (_, i) => 130 + i * 8)].map((a) =>
+        shell(a, BOT - 1.8, R + 0.6, RY + 0.2),
+      )
+    : [];
+  // Inscription pochée : couleur contrastée selon la finition
+  const writingColor = luminance(exterior) > 0.6 ? "#b9776d" : "#fbf4ea";
+  // Le cœur se décale pour ne pas passer sous les fleurs ou le topper
+  const writingX = deco.has("flowers") ? CX - 48 : deco.has("topper") ? CX + 26 : CX - 6;
+
   const drips = sauce
     ? [6, 13, 20, 27, 34, 41, 47, 133, 139, 146, 153, 160, 167, 174].map((a, i) => {
         const [x, y] = pt(a, TOP);
         const w = 5 * Math.max(0.4, Math.sin(rad(a)));
-        const len = 7 + ((i * 37) % 23);
+        const len = 6 + ((i * 37) % 19);
         return `M${f(x - w / 2)} ${f(y)}V${f(y + len)}C${f(x - w / 2)} ${f(y + len + w)} ${f(x + w / 2)} ${f(y + len + w)} ${f(x + w / 2)} ${f(y + len)}V${f(y)}Z`;
       })
     : [];
@@ -548,7 +600,7 @@ export function CakeCrossSection({ tones, className = "" }: { tones: CakeTones; 
       : [[0, darken(exterior, 0.2)], [0.2, lighten(exterior, finish === "fondant" ? 0.18 : 0.12)], [0.5, exterior], [0.84, darken(exterior, 0.08)], [1, darken(exterior, 0.25)]];
 
   return (
-    <svg viewBox="0 14 320 288" className={className} aria-hidden="true" role="presentation">
+    <svg viewBox="22 40 276 252" className={className} aria-hidden="true" role="presentation">
       <defs>
         {/* Alvéoles de la mie, paillettes de lumière, satin de la crème (motifs légers, répétés) */}
         <pattern id={id("pores")} patternUnits="userSpaceOnUse" width={poreTile[0]} height={poreTile[1]}>
@@ -612,12 +664,18 @@ export function CakeCrossSection({ tones, className = "" }: { tones: CakeTones; 
             <stop offset="1" stopColor={darken(sauce, 0.2)} />
           </linearGradient>
         )}
-        <linearGradient id={id("plate")} gradientUnits="userSpaceOnUse" x1={CX - R - 22} y1="0" x2={CX + R + 22} y2="0">
-          <stop offset="0" stopColor="#e2d7c9" />
-          <stop offset="0.3" stopColor="#fdfaf5" />
-          <stop offset="0.7" stopColor="#f3ece2" />
-          <stop offset="1" stopColor="#d8ccbc" />
+        <linearGradient id={id("lid")} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={KRAFT_IN} />
+          <stop offset="1" stopColor={KRAFT} />
         </linearGradient>
+        <radialGradient id={id("floor")} cx="0.5" cy="0.55" r="0.65">
+          <stop offset="0.55" stopColor={KRAFT_IN} />
+          <stop offset="1" stopColor={KRAFT} />
+        </radialGradient>
+        <pattern id={id("kraftFibers")} patternUnits="userSpaceOnUse" width="23" height="13">
+          <path d="M2 3l5 1M12 9l6-1M16 2l3 2M5 10l3 0.5" stroke={KRAFT_DARK} strokeWidth="0.4" strokeLinecap="round" opacity="0.6" />
+          <circle cx="20" cy="11" r="0.4" fill={KRAFT_DARK} />
+        </pattern>
         <linearGradient id={id("gold")} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#f6e2a8" />
           <stop offset="0.45" stopColor="#d4a548" />
@@ -643,15 +701,41 @@ export function CakeCrossSection({ tones, className = "" }: { tones: CakeTones; 
         </clipPath>
       </defs>
 
-      {/* Présentoir */}
-      <ellipse cx={CX} cy={BOT + 68} rx="74" ry="7" fill="rgba(58,37,32,0.14)" filter={url("soft")} />
-      <path d={`M${CX - 46} ${BOT + 59}A46 9 0 0 0 ${CX + 46} ${BOT + 59}V${BOT + 63}A46 9 0 0 1 ${CX - 46} ${BOT + 63}Z`} fill="#ddd1c2" />
-      <ellipse cx={CX} cy={BOT + 59} rx="46" ry="9" fill={url("plate")} stroke="#e6dccf" strokeWidth="0.6" />
-      <path d={`M${CX - 8} ${BOT + 14}C${CX - 7} ${BOT + 36} ${CX - 12} ${BOT + 50} ${CX - 26} ${BOT + 58}Q${CX} ${BOT + 64} ${CX + 26} ${BOT + 58}C${CX + 12} ${BOT + 50} ${CX + 7} ${BOT + 36} ${CX + 8} ${BOT + 14}Z`} fill={url("plate")} />
-      <path d={`M${CX - 3} ${BOT + 20}C${CX - 3} ${BOT + 38} ${CX - 6} ${BOT + 50} ${CX - 14} ${BOT + 57}`} stroke="#fff" strokeWidth="1.6" opacity="0.6" fill="none" strokeLinecap="round" />
-      <path d={`M${CX - R - 20} ${BOT + 2}A${R + 20} ${RY + 7} 0 0 0 ${CX + R + 20} ${BOT + 2}V${BOT + 6}A${R + 20} ${RY + 7} 0 0 1 ${CX - R - 20} ${BOT + 6}Z`} fill="#ddd1c2" />
-      <ellipse cx={CX} cy={BOT + 2} rx={R + 20} ry={RY + 7} fill={url("plate")} stroke="#e6dccf" strokeWidth="0.6" />
-      <ellipse cx={CX} cy={BOT + 3} rx={R + 4} ry={RY + 2} fill="rgba(58,37,32,0.14)" filter={url("soft")} />
+      {/* Boîte bento en kraft : ombre, couvercle ouvert, fond, parois */}
+      <rect x={BOX.l + 6} y={BOX.front - 4} width={BOX.r - BOX.l - 12} height="10" rx="5" fill="rgba(58,37,32,0.18)" filter={url("soft")} />
+      <path
+        d={`M${BOX.l} ${BOX.back - BOX.wall}L${BOX.l + 10} ${BOX.back - BOX.wall - BOX.lid}H${BOX.r - 10}L${BOX.r} ${BOX.back - BOX.wall}Z`}
+        fill={url("lid")}
+      />
+      <rect x={BOX.l + 10} y={BOX.back - BOX.wall - BOX.lid} width={BOX.r - BOX.l - 20} height={BOX.lid} fill={url("kraftFibers")} opacity="0.3" />
+      <path
+        d={`M${BOX.l} ${BOX.back - BOX.wall}L${BOX.l + 10} ${BOX.back - BOX.wall - BOX.lid}H${BOX.r - 10}L${BOX.r} ${BOX.back - BOX.wall}`}
+        fill="none"
+        stroke={KRAFT_DARK}
+        strokeWidth="3.5"
+        strokeLinejoin="round"
+      />
+      {/* Languette de fermeture */}
+      <path
+        d={`M${CX - 16} ${BOX.back - BOX.wall - BOX.lid}Q${CX} ${BOX.back - BOX.wall - BOX.lid - 16} ${CX + 16} ${BOX.back - BOX.wall - BOX.lid}Z`}
+        fill={KRAFT}
+        stroke={KRAFT_DARK}
+        strokeWidth="1"
+      />
+      {/* Charnière + paroi arrière (face intérieure) */}
+      <rect x={BOX.l} y={BOX.back - BOX.wall} width={BOX.r - BOX.l} height={BOX.wall} fill={KRAFT_DARK} />
+      <rect x={BOX.l} y={BOX.back - BOX.wall - 1.5} width={BOX.r - BOX.l} height="2.5" fill={KRAFT} />
+      {/* Fond */}
+      <rect x={BOX.l} y={BOX.back} width={BOX.r - BOX.l} height={BOX.front - BOX.back} fill={url("floor")} />
+      <rect x={BOX.l} y={BOX.back} width={BOX.r - BOX.l} height={BOX.front - BOX.back} fill={url("kraftFibers")} opacity="0.3" />
+      {/* Parois latérales (vues par la tranche) */}
+      <rect x={BOX.l - 1} y={BOX.back - BOX.wall - 1.5} width="4" height={BOX.front - BOX.back + 1.5} fill={KRAFT} />
+      <rect x={BOX.r - 3} y={BOX.back - BOX.wall - 1.5} width="4" height={BOX.front - BOX.back + 1.5} fill={KRAFT} />
+
+      {/* Petit carton rond sous le gâteau */}
+      <ellipse cx={CX} cy={BOT + 2} rx={R + 7} ry={RY + 3} fill="#d9cbb6" />
+      <ellipse cx={CX} cy={BOT} rx={R + 7} ry={RY + 3} fill="#f6f1e8" />
+      <ellipse cx={CX} cy={BOT + 2} rx={R + 2} ry={RY + 1} fill="rgba(58,37,32,0.16)" filter={url("soft")} />
       {/* Ombre au fond de la part retirée */}
       <path d={`M${CX} ${BOT}L${P(CUT_R, BOT)}A${R} ${RY} 0 0 1 ${P(CUT_L, BOT)}Z`} fill="rgba(58,37,32,0.08)" />
 
@@ -661,7 +745,7 @@ export function CakeCrossSection({ tones, className = "" }: { tones: CakeTones; 
       ))}
       {tones.exterieur && finish === "buttercream" && (
         <g clipPath={url("sides")} className="animate-fade-in">
-          {[16, 34, 55, 76, 98, 114].map((dy) => (
+          {[12, 26, 40, 54, 68, 80].map((dy) => (
             <g key={dy}>
               <path d={rimArc(-5, 185, TOP + dy)} stroke="#fff" strokeWidth="0.9" opacity="0.4" fill="none" />
               <path d={rimArc(-5, 185, TOP + dy + 1)} stroke="#2a1712" strokeWidth="0.5" opacity="0.06" fill="none" />
@@ -724,6 +808,29 @@ export function CakeCrossSection({ tones, className = "" }: { tones: CakeTones; 
           const [x, y] = pt(a, BOT - 2.4);
           return <circle key={a} cx={f(x)} cy={f(y)} r="2.5" fill={url("pearl")} className="animate-fade-in" />;
         })}
+
+      {bottomShells.map((sh) => (
+        <Shell key={`b${sh.a}`} x={sh.x} y={sh.y} angle={sh.angle} color={shellColor} />
+      ))}
+      {topShells
+        .filter((sh) => Math.sin(rad(sh.a)) < 0)
+        .map((sh) => (
+          <Shell key={`t${sh.a}`} x={sh.x} y={sh.y} angle={sh.angle} color={shellColor} />
+        ))}
+
+      {/* Inscription pochée (cœur) au centre du dessus */}
+      {deco.has("writing") && (
+        <g className="animate-fade-up" fill="none" stroke={writingColor} strokeLinecap="round" strokeLinejoin="round">
+          <path
+            transform={`translate(${writingX} ${TOP - 14}) scale(1.5 0.62)`}
+            d="M0 10C-9 3 -13 -2 -11 -7C-9 -12 -2 -12 0 -6C2 -12 9 -12 11 -7C13 -2 9 3 0 10Z"
+            strokeWidth="2.6"
+          />
+          {[-34, -26, 14, 22].map((dx, i) => (
+            <circle key={dx} cx={writingX + 6 + dx} cy={TOP - 13 + (i % 2) * 3} r="1.3" fill={writingColor} stroke="none" />
+          ))}
+        </g>
+      )}
 
       {backRosettes.map((r) => (
         <Rosette key={r.a} x={r.x} y={r.y} color={rosetteColor} />
@@ -826,6 +933,16 @@ export function CakeCrossSection({ tones, className = "" }: { tones: CakeTones; 
       {frontRosettes.map((r) => (
         <Rosette key={r.a} x={r.x} y={r.y} color={rosetteColor} />
       ))}
+      {topShells
+        .filter((sh) => Math.sin(rad(sh.a)) >= 0)
+        .map((sh) => (
+          <Shell key={`t${sh.a}`} x={sh.x} y={sh.y} angle={sh.angle} color={shellColor} />
+        ))}
+
+      {/* Paroi avant de la boîte */}
+      <rect x={BOX.l - 1} y={BOX.front - BOX.wall} width={BOX.r - BOX.l + 2} height={BOX.wall} fill={KRAFT} />
+      <rect x={BOX.l - 1} y={BOX.front - BOX.wall} width={BOX.r - BOX.l + 2} height={BOX.wall} fill={url("kraftFibers")} opacity="0.6" />
+      <rect x={BOX.l - 1} y={BOX.front - BOX.wall - 1.2} width={BOX.r - BOX.l + 2} height="1.6" fill={KRAFT_IN} />
     </svg>
   );
 }
