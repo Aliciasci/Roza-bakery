@@ -123,6 +123,47 @@ export const faqSchema = z.array(
   }),
 );
 
+export const helwaSchema = z
+  .array(
+    z.object({
+      id,
+      label: text(60).min(1, "Chaque catégorie doit avoir un nom"),
+      description: optionalText(200),
+      kab: kabFields(["label", "description"] as const, 200),
+      items: z
+        .array(
+          z.object({
+            id,
+            name: text(80).min(1, "Chaque pièce doit avoir un nom"),
+            description: optionalText(200),
+            price: z.number({ error: "Prix invalide" }).min(0, "Prix invalide").max(1000, "Prix invalide"),
+            minQuantity: z
+              .number()
+              .int("La quantité minimale doit être un nombre entier")
+              .min(1, "Minimum de pièces invalide")
+              .max(500, "Minimum de pièces invalide")
+              .optional()
+              .transform((v) => (v && v > 1 ? v : undefined)),
+            image,
+            tone,
+            color: hex,
+            available: z.boolean().optional(),
+            kab: kabFields(["name", "description"] as const, 200),
+          }),
+        )
+        .max(100),
+    }),
+  )
+  .max(20)
+  .superRefine((categories, ctx) => {
+    const seen = new Set<string>();
+    for (const c of categories)
+      for (const item of c.items) {
+        if (seen.has(item.id)) ctx.addIssue({ code: "custom", message: `Identifiant en double : ${item.id}` });
+        seen.add(item.id);
+      }
+  });
+
 export const photosSchema = z.object({
   heroImage: image,
   heroImageAlt: optionalText(160),

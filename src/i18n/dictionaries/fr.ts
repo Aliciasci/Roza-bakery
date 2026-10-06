@@ -50,11 +50,19 @@ export const fr = {
     },
     recap: "Récapitulatif de ma demande",
     confirmation: "Demande envoyée",
+    helwa: {
+      title: "Helwa — gâteaux à la pièce, cookies & gâteaux orientaux",
+      description:
+        "Commandez vos cookies et gâteaux orientaux à la pièce : baklawa, makrout, dziriette… Choisissez vos quantités, le prix s'affiche en direct. Retrait sur place.",
+    },
+    helwaOrder: "Ma commande Helwa",
+    helwaConfirmation: "Commande Helwa envoyée",
   },
 
   nav: {
     home: "Accueil",
     compose: "Composer",
+    helwa: "Helwa",
     creations: "Créations",
     about: "À propos",
     faq: "FAQ",
@@ -292,6 +300,44 @@ export const fr = {
     flavorToChoose: "à choisir",
   },
 
+  helwa: {
+    eyebrow: "Helwa · à la pièce",
+    title1: "Gâteaux",
+    title2: "à la pièce",
+    intro: "Cookies, gâteaux orientaux… Choisissez vos douceurs et le nombre de pièces : le total se calcule au fur et à mesure.",
+    perPiece: "la pièce",
+    minQty: (n: number) => `À partir de ${n} pièces`,
+    add: (name: string) => `Ajouter « ${name} »`,
+    remove: (name: string) => `Retirer une pièce de « ${name} »`,
+    plus: (name: string) => `Ajouter une pièce de « ${name} »`,
+    quantity: (name: string) => `Nombre de pièces de « ${name} »`,
+    lineTotal: (qty: number, price: string) => `${qty} × ${price}`,
+    pieces: (n: number) => `${n} ${plural(n, "pièce", "pièces")}`,
+    total: "Total",
+    emptyCart: "Votre sélection est vide pour le moment.",
+    order: "Commander",
+    cartAria: "Ma sélection Helwa",
+    empty: "Aucune pièce n'est proposée pour le moment. Revenez bientôt !",
+    // Page commande
+    backToCatalog: "← Modifier ma sélection",
+    orderEyebrow: "Commande Helwa",
+    orderTitle1: "Encore un instant,",
+    orderTitle2: "et c'est commandé",
+    orderIntro: "Indiquez vos coordonnées et le jour où vous passerez chercher vos douceurs.",
+    selection: "Ma sélection",
+    modify: "Modifier",
+    submit: "Envoyer ma commande",
+    sending: "Envoi en cours…",
+    confirmNote: "Roza Bakery vous confirmera la disponibilité avant de préparer votre commande. Paiement au retrait, aucun paiement en ligne.",
+    // Confirmation
+    thanksTitle: "Votre commande est bien partie",
+    thanksText: "Merci ! Roza Bakery va vérifier la disponibilité et revenir vers vous pour confirmer votre commande.",
+    backHome: "Retour à l'accueil",
+    noneTitle: "Aucune commande récente",
+    noneText: "Envie de cookies ou de gâteaux orientaux ?",
+    seeHelwa: "Voir les Helwa",
+  },
+
   photos: {
     script: "inspiration",
     title: "Vous avez une inspiration ?",
@@ -365,6 +411,10 @@ export const fr = {
     stepFlavor: (step: string, flavorLabel: string, option: string) =>
       `Étape « ${step} » : choisissez la ${flavorLabel.toLowerCase()} pour « ${option} ».`,
     customLong: "Une précision est trop longue.",
+    helwaEmpty: "Choisissez au moins une pièce.",
+    helwaUnknown: "Une pièce de votre sélection n'est plus disponible. Merci de la retirer.",
+    helwaInvalid: (name: string) => `Quantité invalide pour « ${name} ».`,
+    helwaMin: (name: string, min: number) => `« ${name} » : ${min} pièces minimum.`,
   },
 
   recap: {
@@ -429,6 +479,13 @@ export const fr = {
     hello: (firstName: string) => `Bonjour ${firstName},`,
     textIntro:
       "Votre demande est bien partie. Roza Bakery va étudier votre création et revenir vers vous afin de confirmer sa disponibilité et son prix.",
+    helwaSubject: (ref: string) => `Votre commande Helwa est bien reçue ♡ (${ref})`,
+    helwaTitle: "Votre commande est bien partie ♡",
+    helwaIntro: (firstName: string) =>
+      `Bonjour ${firstName}, merci pour votre commande ! Roza Bakery va vérifier la disponibilité et revenir vers vous pour la confirmer.`,
+    helwaTextIntro: "Votre commande est bien partie. Roza Bakery va vérifier la disponibilité et revenir vers vous pour la confirmer.",
+    total: "Total",
+    payOnPickup: "Paiement au retrait. Retrait uniquement sur place.",
   },
 
   dates: {

@@ -10,6 +10,7 @@ const nav = [
   { href: "/admin", label: "Tableau de bord" },
   { href: "/admin/commandes", label: "Commandes" },
   { href: "/admin/configurateur", label: "Configurateur" },
+  { href: "/admin/helwa", label: "Helwa" },
   { href: "/admin/photos", label: "Photos du site" },
   { href: "/admin/creations", label: "Créations" },
   { href: "/admin/faq", label: "FAQ" },

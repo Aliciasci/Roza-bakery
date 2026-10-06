@@ -222,6 +222,10 @@ export type OrderStatus = "nouvelle" | "en-etude" | "confirmee" | "refusee" | "p
 export interface Order {
   id: string;
   reference: string;
+  /** Type de commande : gâteau composé (défaut) ou pièces Helwa. */
+  kind?: "gateau" | "helwa";
+  /** Pièces commandées (commandes Helwa). */
+  helwa?: { lines: HelwaLine[]; total: number };
   createdAt: string;
   status: OrderStatus;
   composition: ResolvedStep[];
@@ -235,6 +239,48 @@ export interface Order {
   /** Notes internes (visibles uniquement dans l'admin). */
   adminNotes?: string;
   updatedAt?: string;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Helwa — gâteaux à la pièce                                                  */
+/* -------------------------------------------------------------------------- */
+
+export interface HelwaItem {
+  /** Identifiant stable (enregistré dans les commandes). */
+  id: string;
+  name: string;
+  description?: string;
+  /** Prix d'une pièce, en euros. */
+  price: number;
+  /** Quantité minimale commandable (ex. 6 cookies). Défaut : 1. */
+  minQuantity?: number;
+  image?: string;
+  tone: Tone;
+  color?: string;
+  /** `false` = masqué du site (hors saison, rupture…). */
+  available?: boolean;
+  kab?: { name?: string; description?: string };
+}
+
+export interface HelwaCategory {
+  id: string;
+  /** Ex. « Cookies », « Gâteaux orientaux ». */
+  label: string;
+  description?: string;
+  items: HelwaItem[];
+  kab?: { label?: string; description?: string };
+}
+
+/** Panier envoyé par la page Helwa : identifiant de pièce → quantité. */
+export type HelwaCart = Record<string, number>;
+
+/** Ligne de commande Helwa (prix figé au moment de la commande). */
+export interface HelwaLine {
+  itemId: string;
+  name: string;
+  unitPrice: number;
+  quantity: number;
+  total: number;
 }
 
 /** Tout le contenu modifiable depuis l'admin. */
@@ -256,4 +302,5 @@ export interface SiteContent {
   creations: Creation[];
   categories: CreationCategoryInfo[];
   faq: FaqItem[];
+  helwa: HelwaCategory[];
 }

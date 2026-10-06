@@ -32,7 +32,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <PageTitle title="Commandes" intro="Toutes les demandes reçues via le configurateur. Le prix se renseigne dans chaque commande." />
+      <PageTitle title="Commandes" intro="Toutes les demandes reçues via le configurateur et les commandes Helwa (à la pièce). Le prix se renseigne dans chaque commande." />
 
       <div className="no-scrollbar -mx-4 mb-4 flex gap-2 overflow-x-auto px-4 md:mx-0 md:flex-wrap md:px-0">
         <Link href={href({ statut: undefined })} aria-current={!statut} className={pill}>

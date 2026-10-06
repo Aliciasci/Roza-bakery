@@ -66,11 +66,19 @@ export const kab: Dictionary = {
     },
     recap: "Agzul n tuttra-inu",
     confirmation: "Tuttra tettwazen",
+    helwa: {
+      title: "Helwa — tiḥlawin s yiṭuḍan, kukiz d tḥlawin n tmurt",
+      description:
+        "Ssuter kukiz d tḥlawin n tmurt s yiṭuḍan : baklawa, makrout, dziriette… Fren amḍan, ssuma ad d-tban imir-n. Asali deg tḥanut.",
+    },
+    helwaOrder: "Tuttra-inu n Helwa",
+    helwaConfirmation: "Tuttra n Helwa tettwazen",
   },
 
   nav: {
     home: "Agejdan",
     compose: "Suddes",
+    helwa: "Helwa",
     creations: "Isnulfa",
     about: "Ɣef-nneɣ",
     faq: "Isteqsiyen",
@@ -306,6 +314,42 @@ export const kab: Dictionary = {
     flavorToChoose: "ad tettwafren",
   },
 
+  helwa: {
+    eyebrow: "Helwa · s yiṭuḍan",
+    title1: "Tiḥlawin",
+    title2: "s yiṭuḍan",
+    intro: "Kukiz, tiḥlawin n tmurt… Fren tiḥlawin-ik d umḍan n yiṭuḍan : ssuma tettwaḥsab imir imir.",
+    perPiece: "aṭuḍ",
+    minQty: (n: number) => `Seg ${n} n yiṭuḍan`,
+    add: (name: string) => `Rnu « ${name} »`,
+    remove: (name: string) => `Kkes aṭuḍ seg « ${name} »`,
+    plus: (name: string) => `Rnu aṭuḍ n « ${name} »`,
+    quantity: (name: string) => `Amḍan n yiṭuḍan n « ${name} »`,
+    lineTotal: (qty: number, price: string) => `${qty} × ${price}`,
+    pieces: (n: number) => `${n} ${n > 1 ? "n yiṭuḍan" : "n uṭuḍ"}`,
+    total: "Akk",
+    emptyCart: "Ulac ayen i tferneḍ akka tura.",
+    order: "Ssuter",
+    cartAria: "Ayen i ferneɣ deg Helwa",
+    empty: "Ulac tiḥlawin akka tura. Uɣal-d ticki !",
+    backToCatalog: "← Beddel ayen i tferneḍ",
+    orderEyebrow: "Tuttra n Helwa",
+    orderTitle1: "Cwiṭ kan,",
+    orderTitle2: "ad tettwazen tuttra",
+    orderIntro: "Aru-d isalan-ik d wass ara d-tawiḍ tiḥlawin-ik.",
+    selection: "Ayen i ferneɣ",
+    modify: "Beddel",
+    submit: "Azen tuttra-inu",
+    sending: "Tuzna…",
+    confirmNote: "Roza Bakery ad ak-d-tini ma yella yelha uqbel ad theggi tuttra-k. Lexlaṣ asmi ara d-tawiḍ, ulac lexlaṣ deg Internet.",
+    thanksTitle: "Tuttra-k tettwazen",
+    thanksText: "Tanemmirt ! Roza Bakery ad tẓer ma yella yelha, sakin ad ak-d-terr awal akken ad tt-tesentem.",
+    backHome: "Uɣal ɣer ugejdan",
+    noneTitle: "Ulac tuttra tamaynut",
+    noneText: "Tebɣiḍ kukiz neɣ tiḥlawin n tmurt ?",
+    seeHelwa: "Wali Helwa",
+  },
+
   photos: {
     script: "tikti",
     title: "Ɣur-k tikti ?",
@@ -355,6 +399,10 @@ export const kab: Dictionary = {
   },
 
   validation: {
+    helwaEmpty: "Fren ɣef wudem amecṭuḥ yiwen n uṭuḍ.",
+    helwaUnknown: "Yiwen n uṭuḍ ur yelli ara tura. Ttxil-k kkes-it.",
+    helwaInvalid: (name: string) => `Amḍan ur yelhi ara i « ${name} ».`,
+    helwaMin: (name: string, min: number) => `« ${name} » : ${min} n yiṭuḍan ma drus.`,
     firstName: "Ttxil, ini-d isem-ik.",
     firstNameLong: "Isem ɣezzif aṭas.",
     lastName: "Ttxil, ini-d isem n twacult.",
@@ -433,6 +481,13 @@ export const kab: Dictionary = {
   },
 
   email: {
+    helwaSubject: (ref: string) => `Tuttra-k n Helwa tewweḍ-d ♡ (${ref})`,
+    helwaTitle: "Tuttra-k tettwazen ♡",
+    helwaIntro: (firstName: string) =>
+      `Azul ${firstName}, tanemmirt ɣef tuttra-k ! Roza Bakery ad tẓer ma yella yelha, sakin ad ak-d-terr awal akken ad tt-tesentem.`,
+    helwaTextIntro: "Tuttra-k tettwazen. Roza Bakery ad tẓer ma yella yelha, sakin ad ak-d-terr awal akken ad tt-tesentem.",
+    total: "Akk",
+    payOnPickup: "Lexlaṣ asmi ara d-tawiḍ. Asali deg tḥanut kan.",
     customerSubject: (ref: string) => `Tuttra-k n tḥlawt tewweḍ-d ♡ (${ref})`,
     customerTitle: "Tuttra-k tettwazen ♡",
     customerIntro: (firstName: string) =>

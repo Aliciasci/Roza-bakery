@@ -9,11 +9,12 @@ import {
   localizeCategories,
   localizeCreations,
   localizeFaq,
+  localizeHelwa,
   localizePhotos,
   localizeSite,
   localizeSteps,
 } from "@/lib/localize";
-import type { CompositionStep, Creation, CreationCategoryInfo, FaqItem, SiteInfo, SitePhotos } from "@/lib/types";
+import type { CompositionStep, Creation, CreationCategoryInfo, FaqItem, HelwaCategory, SiteInfo, SitePhotos } from "@/lib/types";
 import { getContent } from "@/server/content/store";
 
 export async function getSiteInfo(locale: Locale = defaultLocale): Promise<SiteInfo> {
@@ -46,4 +47,13 @@ export async function getCreationCategories(locale: Locale = defaultLocale): Pro
 
 export async function getFaq(locale: Locale = defaultLocale): Promise<FaqItem[]> {
   return localizeFaq((await getContent()).faq, locale);
+}
+
+/** Catalogue Helwa pour le site public : pièces masquées et catégories vides retirées. */
+export async function getHelwa(locale: Locale = defaultLocale): Promise<HelwaCategory[]> {
+  const { helwa } = await getContent();
+  const visible = helwa
+    .map((category) => ({ ...category, items: category.items.filter((item) => item.available !== false) }))
+    .filter((category) => category.items.length > 0);
+  return localizeHelwa(visible, locale);
 }

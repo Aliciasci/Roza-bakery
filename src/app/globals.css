@@ -45,6 +45,7 @@
   --animate-step-in-prev: step-in-prev 0.45s var(--ease-soft) both;
   --animate-fade-up: fade-up 0.6s var(--ease-soft) both;
   --animate-pop: pop 0.32s var(--ease-soft) both;
+  --animate-bump: bump 0.4s var(--ease-soft) both;
   --animate-sheet-in: sheet-in 0.38s var(--ease-soft) both;
   --animate-fade-in: fade-in 0.3s ease both;
 
@@ -64,6 +65,11 @@
     0% { transform: scale(0.4); opacity: 0; }
     60% { transform: scale(1.12); opacity: 1; }
     100% { transform: scale(1); }
+  }
+  @keyframes bump {
+    0% { transform: translate3d(0, 5px, 0); opacity: 0.35; }
+    55% { transform: translate3d(0, -2px, 0) scale(1.06); opacity: 1; }
+    100% { transform: none; }
   }
   @keyframes sheet-in {
     from { transform: translate3d(0, 100%, 0); }

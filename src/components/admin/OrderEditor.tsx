@@ -1,6 +1,7 @@
 "use client";
 
 import { updateOrder } from "@/app/admin/actions";
+import { formatPrice } from "@/lib/helwa";
 import { orderStatuses } from "@/lib/order-status";
 import type { Order, OrderStatus } from "@/lib/types";
 import { Card, Field, SaveBar, inputClass, useEditor } from "./ui";
@@ -47,12 +48,19 @@ export function OrderEditor({ order }: { order: Order }) {
         ))}
       </div>
       <div className="mt-6 grid gap-4">
-        <Field label="Prix confirmé (€)" hint="Visible uniquement ici — à communiquer à la cliente.">
+        <Field
+          label="Prix confirmé (€)"
+          hint={
+            order.helwa
+              ? `Total calculé à la commande : ${formatPrice(order.helwa.total)}. À renseigner seulement en cas de changement.`
+              : "Visible uniquement ici — à communiquer à la cliente."
+          }
+        >
           {(id) => (
             <input
               id={id}
               inputMode="decimal"
-              placeholder="Ex. 85"
+              placeholder={order.helwa ? String(order.helwa.total).replace(".", ",") : "Ex. 85"}
               className={inputClass}
               aria-invalid={priceInvalid || undefined}
               value={v.confirmedPrice}

@@ -22,6 +22,11 @@ export default async function DashboardPage() {
   const optionCount = content.steps.reduce((n, s) => n + s.groups.reduce((m, g) => m + g.options.length, 0), 0);
   const shortcuts = [
     { href: "/admin/configurateur", title: "Configurateur", text: `${optionCount} options — crèmes, inserts, fruits…` },
+    {
+      href: "/admin/helwa",
+      title: "Helwa",
+      text: `${content.helwa.reduce((n, c) => n + c.items.length, 0)} pièces — cookies, gâteaux orientaux…`,
+    },
     { href: "/admin/creations", title: "Créations", text: `${content.creations.length} créations dans la galerie` },
     { href: "/admin/faq", title: "FAQ", text: `${content.faq.length} questions` },
     { href: "/admin/infos", title: "Infos & retrait", text: "Coordonnées, horaires, délais, créneaux, congés" },

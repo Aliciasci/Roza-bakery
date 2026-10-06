@@ -6,7 +6,7 @@ import { useI18n } from "@/i18n/client";
 import { checkPickupDate, formatDateLong } from "@/lib/dates";
 import { LIMITS, type FieldErrors } from "@/lib/validation";
 import type { CustomerInfo } from "@/lib/types";
-import { useConfigurator } from "./ConfiguratorProvider";
+import { useConfigurator, type ConfiguratorSite } from "./ConfiguratorProvider";
 import { PhotoUploader } from "./PhotoUploader";
 import { PickupCalendar } from "./PickupCalendar";
 
@@ -51,6 +51,36 @@ const describe = (id: string, error?: string) => (error ? `${id}-error` : undefi
 
 export function CustomerStep({ errors }: { errors: Errors }) {
   const { customer, updateCustomer, site, photos, setPhotos } = useConfigurator();
+  return (
+    <CustomerFields
+      customer={customer}
+      updateCustomer={updateCustomer}
+      site={site}
+      errors={errors}
+      photos={{ files: photos, onChange: setPhotos }}
+    />
+  );
+}
+
+/**
+ * Coordonnées, date et créneau de retrait, message — partagé par le configurateur et la commande Helwa.
+ * Sans `photos`, l'envoi d'inspirations est masqué ; `servings={false}` masque le nombre de personnes.
+ */
+export function CustomerFields({
+  customer,
+  updateCustomer,
+  site,
+  errors,
+  photos,
+  servings: withServings = true,
+}: {
+  customer: CustomerInfo;
+  updateCustomer: (patch: Partial<CustomerInfo>) => void;
+  site: ConfiguratorSite;
+  errors: Errors;
+  photos?: { files: File[]; onChange: (files: File[]) => void };
+  servings?: boolean;
+}) {
   const { locale, t } = useI18n();
   const tc = t.customer;
   const dateStatus = customer.pickupDate ? checkPickupDate(customer.pickupDate, site) : null;
@@ -170,36 +200,38 @@ export function CustomerStep({ errors }: { errors: Errors }) {
               )}
             </div>
 
-            <Field id="f-servings" label={tc.servings} error={errors.servings}>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  aria-label={tc.minus}
-                  onClick={() => updateCustomer({ servings: String(Math.max(1, servings - 1)) })}
-                  className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-chocolate/15 bg-paper transition active:scale-90 hover:border-chocolate/40"
-                >
-                  <MinusIcon className="h-4 w-4" />
-                </button>
-                <input
-                  {...input("servings", {
-                    type: "number",
-                    inputMode: "numeric",
-                    min: 1,
-                    max: LIMITS.servingsMax,
-                    placeholder: tc.servingsPlaceholder,
-                  })}
-                  className="field text-center font-serif !text-2xl"
-                />
-                <button
-                  type="button"
-                  aria-label={tc.plus}
-                  onClick={() => updateCustomer({ servings: String(Math.min(LIMITS.servingsMax, servings + 1)) })}
-                  className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-chocolate/15 bg-paper transition active:scale-90 hover:border-chocolate/40"
-                >
-                  <PlusIcon className="h-4 w-4" />
-                </button>
-              </div>
-            </Field>
+            {withServings && (
+              <Field id="f-servings" label={tc.servings} error={errors.servings}>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    aria-label={tc.minus}
+                    onClick={() => updateCustomer({ servings: String(Math.max(1, servings - 1)) })}
+                    className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-chocolate/15 bg-paper transition active:scale-90 hover:border-chocolate/40"
+                  >
+                    <MinusIcon className="h-4 w-4" />
+                  </button>
+                  <input
+                    {...input("servings", {
+                      type: "number",
+                      inputMode: "numeric",
+                      min: 1,
+                      max: LIMITS.servingsMax,
+                      placeholder: tc.servingsPlaceholder,
+                    })}
+                    className="field text-center font-serif !text-2xl"
+                  />
+                  <button
+                    type="button"
+                    aria-label={tc.plus}
+                    onClick={() => updateCustomer({ servings: String(Math.min(LIMITS.servingsMax, servings + 1)) })}
+                    className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-chocolate/15 bg-paper transition active:scale-90 hover:border-chocolate/40"
+                  >
+                    <PlusIcon className="h-4 w-4" />
+                  </button>
+                </div>
+              </Field>
+            )}
           </div>
         </div>
       </fieldset>
@@ -218,13 +250,15 @@ export function CustomerStep({ errors }: { errors: Errors }) {
             onChange={(e) => updateCustomer({ message: e.target.value })}
           />
         </Field>
-        <PhotoUploader
-          files={photos}
-          onChange={setPhotos}
-          max={site.maxInspirationPhotos}
-          title={t.photos.titleInfo}
-          description={t.photos.descriptionInfo}
-        />
+        {photos && (
+          <PhotoUploader
+            files={photos.files}
+            onChange={photos.onChange}
+            max={site.maxInspirationPhotos}
+            title={t.photos.titleInfo}
+            description={t.photos.descriptionInfo}
+          />
+        )}
       </fieldset>
     </div>
   );

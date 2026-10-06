@@ -4,6 +4,7 @@ import path from "node:path";
 import { compositionSteps } from "@/content/configurator";
 import { creationCategories, creations } from "@/content/creations";
 import { faq } from "@/content/faq";
+import { helwaCategories } from "@/content/helwa";
 import { site } from "@/content/site";
 import type { CompositionStep, SiteContent } from "@/lib/types";
 import { DATA_DIR } from "@/server/data-dir";
@@ -27,6 +28,7 @@ export const defaultContent: SiteContent = {
   categories: creationCategories,
   faq,
   photos: {},
+  helwa: helwaCategories,
 };
 
 async function readStored(): Promise<Partial<SiteContent>> {
@@ -82,6 +84,10 @@ export async function getContent(): Promise<SiteContent> {
     faq: withDefaultKab(stored.faq ?? defaultContent.faq, defaultContent.faq),
     categories: withDefaultKab(stored.categories ?? defaultContent.categories, defaultContent.categories),
     creations: withDefaultKab(stored.creations ?? defaultContent.creations, defaultContent.creations),
+    helwa: withDefaultKab(stored.helwa ?? defaultContent.helwa, defaultContent.helwa).map((category) => ({
+      ...category,
+      items: withDefaultKab(category.items, defaultContent.helwa.flatMap((c) => c.items)),
+    })),
   };
 }
 

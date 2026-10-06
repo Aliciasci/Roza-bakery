@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { daysBetween, formatDateLong, todayISO } from "@/lib/dates";
+import { formatPrice } from "@/lib/helwa";
 import { statusInfo } from "@/lib/order-status";
 import type { Order } from "@/lib/types";
 
@@ -31,14 +32,21 @@ export function OrderList({ orders, empty = "Aucune commande." }: { orders: Orde
                 {o.customer.firstName} {o.customer.lastName}
               </p>
               <p className="truncate text-xs text-cocoa">
-                {o.reference} · {o.composition.find((s) => s.stepId === "base")?.items.join(", ") ?? "—"}
+                {o.reference} ·{" "}
+                {o.kind === "helwa" ? (
+                  <span className="font-semibold text-chocolate">Helwa · {formatPrice(o.helwa?.total ?? 0)}</span>
+                ) : (
+                  (o.composition.find((s) => s.stepId === "base")?.items.join(", ") ?? "—")
+                )}
               </p>
             </div>
             <div className="text-sm md:self-center">
               <span className="first-letter:uppercase">{formatDateLong(o.customer.pickupDate)}</span>
               <span className="block text-xs text-cocoa">Retrait {relativePickup(o.customer.pickupDate)}</span>
             </div>
-            <p className="text-sm text-cocoa md:self-center">{o.customer.servings} pers.</p>
+            <p className="text-sm text-cocoa md:self-center">
+              {o.kind === "helwa" ? `${o.helwa?.lines.reduce((n, l) => n + l.quantity, 0) ?? 0} pièces` : `${o.customer.servings} pers.`}
+            </p>
             <div className="md:self-center md:text-right">
               <StatusBadge status={o.status} />
             </div>

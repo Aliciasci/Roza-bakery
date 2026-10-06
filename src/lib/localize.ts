@@ -9,6 +9,7 @@ import type {
   Creation,
   CreationCategoryInfo,
   FaqItem,
+  HelwaCategory,
   PickupSlot,
   SiteInfo,
   SitePhotos,
@@ -69,3 +70,9 @@ export const localizeFaq = (items: FaqItem[], locale: Locale) =>
 
 export const localizePhotos = (photos: SitePhotos, locale: Locale) =>
   pick(photos, locale, ["heroImageAlt", "aboutImageAlt"]);
+
+export const localizeHelwa = (categories: HelwaCategory[], locale: Locale) =>
+  categories.map((c) => ({
+    ...pick(c, locale, ["label", "description"]),
+    items: c.items.map((item) => pick(item, locale, ["name", "description"])),
+  }));

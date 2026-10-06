@@ -1,10 +1,11 @@
 import type { Dictionary } from "@/i18n/dictionaries";
 
-type NavKey = keyof Pick<Dictionary["nav"], "home" | "compose" | "creations" | "about" | "faq" | "how" | "contact">;
+type NavKey = keyof Pick<Dictionary["nav"], "home" | "compose" | "helwa" | "creations" | "about" | "faq" | "how" | "contact">;
 
 export const mainNav: { href: string; key: NavKey }[] = [
   { href: "/", key: "home" },
   { href: "/composer", key: "compose" },
+  { href: "/helwa", key: "helwa" },
   { href: "/creations", key: "creations" },
   { href: "/a-propos", key: "about" },
   { href: "/faq", key: "faq" },

@@ -6,6 +6,7 @@ import { StatusBadge, relativePickup } from "@/components/admin/OrderList";
 import { Card } from "@/components/admin/ui";
 import { localeNames } from "@/i18n/config";
 import { formatDateLong } from "@/lib/dates";
+import { formatPrice } from "@/lib/helwa";
 import { getContent } from "@/server/content/store";
 import { getOrderRepository } from "@/server/orders/repository";
 
@@ -48,25 +49,51 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <div className="space-y-6">
-          <Card>
-            <h2 className="font-serif text-2xl">Le gâteau</h2>
-            <dl className="mt-3">
-              {order.composition
-                .filter((s) => s.items.length || s.notes)
-                .map((s) => (
-                  <div key={s.stepId} className={row}>
-                    <dt className={dt}>{s.label}</dt>
-                    <dd>
-                      <span className="font-serif text-lg">{s.items.join(", ") || "—"}</span>
-                      {s.notes && <span className="mt-1 block text-sm italic text-cocoa">« {s.notes} »</span>}
-                    </dd>
-                  </div>
+          {order.kind === "helwa" ? (
+            <Card>
+              <h2 className="font-serif text-2xl">Helwa · à la pièce</h2>
+              <ul className="mt-3">
+                {order.helwa?.lines.map((l) => (
+                  <li key={l.itemId} className="flex items-baseline justify-between gap-4 border-b border-dashed border-chocolate/12 py-3">
+                    <span>
+                      <span className="font-serif text-lg">{l.name}</span>
+                      <span className="block text-xs text-cocoa">
+                        {l.quantity} × {formatPrice(l.unitPrice)}
+                      </span>
+                    </span>
+                    <span className="shrink-0 font-semibold lining-nums tabular-nums">{formatPrice(l.total)}</span>
+                  </li>
                 ))}
-            </dl>
-            {c.message && (
-              <div className="mt-4 rounded-xl bg-ivory p-4 text-sm leading-relaxed whitespace-pre-wrap">{c.message}</div>
-            )}
-          </Card>
+              </ul>
+              <p className="mt-4 flex items-baseline justify-between">
+                <span className={dt}>Total · {order.helwa?.lines.reduce((n, l) => n + l.quantity, 0)} pièces</span>
+                <span className="font-serif text-3xl lining-nums">{formatPrice(order.helwa?.total ?? 0)}</span>
+              </p>
+              {c.message && (
+                <div className="mt-4 rounded-xl bg-ivory p-4 text-sm leading-relaxed whitespace-pre-wrap">{c.message}</div>
+              )}
+            </Card>
+          ) : (
+            <Card>
+              <h2 className="font-serif text-2xl">Le gâteau</h2>
+              <dl className="mt-3">
+                {order.composition
+                  .filter((s) => s.items.length || s.notes)
+                  .map((s) => (
+                    <div key={s.stepId} className={row}>
+                      <dt className={dt}>{s.label}</dt>
+                      <dd>
+                        <span className="font-serif text-lg">{s.items.join(", ") || "—"}</span>
+                        {s.notes && <span className="mt-1 block text-sm italic text-cocoa">« {s.notes} »</span>}
+                      </dd>
+                    </div>
+                  ))}
+              </dl>
+              {c.message && (
+                <div className="mt-4 rounded-xl bg-ivory p-4 text-sm leading-relaxed whitespace-pre-wrap">{c.message}</div>
+              )}
+            </Card>
+          )}
 
           {order.inspirationFiles.length > 0 && (
             <Card>
@@ -105,10 +132,12 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                 <dt className={dt}>Créneau</dt>
                 <dd>{slot}</dd>
               </div>
-              <div className={row}>
-                <dt className={dt}>Personnes</dt>
-                <dd>{c.servings}</dd>
-              </div>
+              {order.kind !== "helwa" && (
+                <div className={row}>
+                  <dt className={dt}>Personnes</dt>
+                  <dd>{c.servings}</dd>
+                </div>
+              )}
             </dl>
           </Card>
 
@@ -116,7 +145,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <h2 className="font-serif text-2xl">Contact</h2>
             <div className="mt-4 flex flex-col gap-2">
               <a
-                href={`mailto:${c.email}?subject=${encodeURIComponent(`Votre gâteau Roza Bakery (${order.reference})`)}`}
+                href={`mailto:${c.email}?subject=${encodeURIComponent(`${order.kind === "helwa" ? "Votre commande Helwa" : "Votre gâteau"} Roza Bakery (${order.reference})`)}`}
                 className="flex min-h-11 items-center justify-between rounded-xl bg-ivory px-4 text-sm hover:bg-sand"
               >
                 <span className="truncate">{c.email}</span> <span aria-hidden>✉</span>

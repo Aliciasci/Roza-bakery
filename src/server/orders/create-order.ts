@@ -12,7 +12,7 @@ import type { OrderPayload } from "./schema";
 
 export class OrderValidationError extends Error {}
 
-function makeReference() {
+export function makeReference() {
   const d = new Date();
   const ymd = `${String(d.getFullYear()).slice(2)}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
   const rand = Array.from({ length: 4 }, () => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]).join("");

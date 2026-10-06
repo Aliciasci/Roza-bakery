@@ -1,8 +1,9 @@
 import "server-only";
 import { formatDateLong } from "@/lib/dates";
+import { formatPrice } from "@/lib/helwa";
 import { localeNames, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
-import type { Order, ResolvedStep, SiteInfo } from "@/lib/types";
+import type { HelwaLine, Order, ResolvedStep, SiteInfo } from "@/lib/types";
 
 const esc = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
@@ -39,8 +40,8 @@ function pickupBlock(order: Order, site: SiteInfo, locale: Locale = "fr") {
   return `<table role="presentation" style="width:100%;border-collapse:collapse;margin-top:16px">
     <tr><td style="padding:8px 0;font:600 11px Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6a4f45;width:130px">${esc(t.pickup)}</td>
         <td style="font:17px Georgia,serif;color:#3a2520">${esc(formatDateLong(order.customer.pickupDate, locale))} · ${esc(slot)}</td></tr>
-    <tr><td style="padding:8px 0;font:600 11px Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6a4f45">${esc(t.servings)}</td>
-        <td style="font:17px Georgia,serif;color:#3a2520">${esc(order.customer.servings)}</td></tr>
+    ${order.kind === "helwa" ? "" : `<tr><td style="padding:8px 0;font:600 11px Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6a4f45">${esc(t.servings)}</td>
+        <td style="font:17px Georgia,serif;color:#3a2520">${esc(order.customer.servings)}</td></tr>`}
   </table>`;
 }
 
@@ -98,6 +99,88 @@ export function bakeryEmail(order: Order, site: SiteInfo) {
     `Retrait : ${formatDateLong(c.pickupDate)} (${c.pickupSlot}) — ${c.servings} personnes`,
     "",
     ...order.composition.filter((s) => s.items.length || s.notes).map((s) => `${s.label} : ${s.items.join(", ")}${s.notes ? ` (${s.notes})` : ""}`),
+    "",
+    c.message,
+  ].join("\n");
+  return { subject, html, text };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Helwa (gâteaux à la pièce)                                                  */
+/* -------------------------------------------------------------------------- */
+
+function helwaRows(lines: HelwaLine[], total: number, totalLabel: string) {
+  const cell = "padding:10px 0;border-bottom:1px dashed #e4d6c6;color:#3a2520";
+  return `<table role="presentation" style="width:100%;border-collapse:collapse">
+    ${lines
+      .map(
+        (l) => `<tr>
+        <td style="${cell};font:17px/1.4 Georgia,serif">${esc(l.name)}
+          <div style="font:13px Arial,sans-serif;color:#6a4f45">${l.quantity} × ${esc(formatPrice(l.unitPrice))}</div></td>
+        <td style="${cell};font:15px Arial,sans-serif;text-align:right;white-space:nowrap;vertical-align:top">${esc(formatPrice(l.total))}</td>
+      </tr>`,
+      )
+      .join("")}
+    <tr>
+      <td style="padding:14px 0 0;font:600 11px Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6a4f45">${esc(totalLabel)}</td>
+      <td style="padding:14px 0 0;font:24px Georgia,serif;color:#3a2520;text-align:right;white-space:nowrap">${esc(formatPrice(total))}</td>
+    </tr>
+  </table>`;
+}
+
+/** Accusé de réception d'une commande Helwa, dans la langue de la cliente (`lines` et `site` déjà traduits). */
+export function helwaCustomerEmail(order: Order, site: SiteInfo, lines: HelwaLine[], locale: Locale = "fr") {
+  const t = getDictionary(locale).email;
+  const total = order.helwa?.total ?? 0;
+  const html = layout(
+    esc(t.helwaTitle),
+    esc(t.helwaIntro(order.customer.firstName)),
+    `${helwaRows(lines, total, t.total)}
+     ${pickupBlock(order, site, locale)}
+     <p style="margin:24px 0 0;padding:16px;border-radius:14px;background:#f5e6e1;font:14px/1.6 Arial,sans-serif;color:#3a2520">
+       ${esc(t.payOnPickup)}
+     </p>
+     <p style="margin:20px 0 0;font:12px Arial,sans-serif;color:#8c7268">${esc(t.reference)} : ${esc(order.reference)}</p>`,
+    localeNames[locale].htmlLang,
+  );
+  const text = [
+    t.hello(order.customer.firstName),
+    t.helwaTextIntro,
+    "",
+    ...lines.map((l) => `${l.quantity} × ${l.name} : ${formatPrice(l.total)}`),
+    `${t.total} : ${formatPrice(total)}`,
+    `${t.pickup} : ${formatDateLong(order.customer.pickupDate, locale)}`,
+    `${t.reference} : ${order.reference}`,
+  ].join("\n");
+  return { subject: t.helwaSubject(order.reference), html, text };
+}
+
+export function helwaBakeryEmail(order: Order, site: SiteInfo) {
+  const c = order.customer;
+  const lines = order.helwa?.lines ?? [];
+  const total = order.helwa?.total ?? 0;
+  const subject = `Commande Helwa · ${c.firstName} ${c.lastName} · ${formatPrice(total)} · retrait ${formatDateLong(c.pickupDate)}`;
+  const html = layout(
+    "Nouvelle commande Helwa",
+    `Référence <strong>${esc(order.reference)}</strong> · reçue le ${esc(new Date(order.createdAt).toLocaleString("fr-FR", { timeZone: "Europe/Paris" }))}`,
+    `${helwaRows(lines, total, "Total")}
+     ${pickupBlock(order, site)}
+     <h2 style="margin:28px 0 8px;font:400 22px Georgia,serif;color:#3a2520">Cliente / client</h2>
+     <p style="margin:0;font:15px/1.7 Arial,sans-serif;color:#3a2520">
+       ${esc(c.firstName)} ${esc(c.lastName)}<br>
+       <a href="mailto:${esc(c.email)}" style="color:#9e2f45">${esc(c.email)}</a><br>
+       <a href="tel:${esc(c.phone)}" style="color:#9e2f45">${esc(c.phone)}</a>
+     </p>
+     ${c.message ? `<p style="margin:16px 0 0;padding:14px;border-radius:12px;background:#f4ede3;font:14px/1.6 Arial,sans-serif;color:#3a2520;white-space:pre-wrap">${esc(c.message)}</p>` : ""}
+     ${order.locale && order.locale !== "fr" ? `<p style="margin:8px 0 0;font:13px Arial,sans-serif;color:#6a4f45">Langue de la cliente : ${esc(localeNames[order.locale].name)} (accusé de réception envoyé dans cette langue).</p>` : ""}`,
+  );
+  const text = [
+    `Nouvelle commande Helwa ${order.reference}`,
+    `${c.firstName} ${c.lastName} — ${c.email} — ${c.phone}`,
+    `Retrait : ${formatDateLong(c.pickupDate)} (${c.pickupSlot})`,
+    "",
+    ...lines.map((l) => `${l.quantity} × ${l.name} (${formatPrice(l.unitPrice)}) : ${formatPrice(l.total)}`),
+    `Total : ${formatPrice(total)}`,
     "",
     c.message,
   ].join("\n");

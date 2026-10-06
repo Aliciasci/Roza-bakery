@@ -28,6 +28,8 @@ export function validateCustomer(
   site: Pick<SiteInfo, "minLeadDays" | "recommendedLeadDays" | "closedWeekdays" | "unavailableDates" | "pickupSlots">,
   now?: Date,
   m: Messages = fr.validation,
+  /** `false` pour les commandes sans nombre de personnes (Helwa). */
+  withServings = true,
 ): FieldErrors<keyof CustomerInfo> {
   const errors: FieldErrors<keyof CustomerInfo> = {};
 
@@ -58,10 +60,12 @@ export function validateCustomer(
   if (!customer.pickupSlot) errors.pickupSlot = m.slot;
   else if (!site.pickupSlots.some((s) => s.id === customer.pickupSlot)) errors.pickupSlot = m.slotUnknown;
 
-  const servings = Number(customer.servings);
-  if (!customer.servings) errors.servings = m.servings;
-  else if (!Number.isInteger(servings) || servings < 1 || servings > LIMITS.servingsMax)
-    errors.servings = m.servingsInvalid;
+  if (withServings) {
+    const servings = Number(customer.servings);
+    if (!customer.servings) errors.servings = m.servings;
+    else if (!Number.isInteger(servings) || servings < 1 || servings > LIMITS.servingsMax)
+      errors.servings = m.servingsInvalid;
+  }
 
   if (customer.message.length > LIMITS.message) errors.message = m.messageLong;
 
