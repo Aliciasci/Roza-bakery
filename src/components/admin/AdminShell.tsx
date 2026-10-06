@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { logout } from "@/app/admin/actions";
+import { LogoMark } from "@/components/layout/Logo";
 
 const nav = [
   { href: "/admin", label: "Tableau de bord" },
@@ -37,8 +38,8 @@ export function AdminShell({ children, newOrders }: { children: ReactNode; newOr
     <div className="lg:pl-64">
       {/* Barre latérale desktop */}
       <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-chocolate/8 bg-cream p-5 lg:flex">
-        <Link href="/admin" className="px-3.5 pb-8 pt-2 leading-none">
-          <span className="block font-serif text-3xl italic">Roza</span>
+        <Link href="/admin" className="flex items-center gap-3 px-2 pb-8 pt-1 leading-none">
+          <LogoMark size={52} className="h-[52px] w-[52px]" />
           <span className="text-[0.6rem] font-semibold uppercase tracking-[0.4em] text-cocoa">Administration</span>
         </Link>
         <nav aria-label="Administration" className="flex flex-col gap-1">
@@ -59,8 +60,9 @@ export function AdminShell({ children, newOrders }: { children: ReactNode; newOr
       {/* En-tête mobile */}
       <header className="sticky top-0 z-30 border-b border-chocolate/8 bg-cream/95 backdrop-blur lg:hidden">
         <div className="flex h-14 items-center justify-between px-4">
-          <Link href="/admin" className="font-serif text-2xl italic">
-            Roza <span className="font-sans text-[0.6rem] font-semibold not-italic uppercase tracking-[0.3em] text-cocoa">Admin</span>
+          <Link href="/admin" className="flex items-center gap-2">
+            <LogoMark size={40} className="h-10 w-10" />
+            <span className="font-sans text-[0.6rem] font-semibold not-italic uppercase tracking-[0.3em] text-cocoa">Admin</span>
           </Link>
           <div className="flex items-center gap-1 text-sm">
             <a href="/" target="_blank" rel="noopener" className="rounded-full px-3 py-2 text-cocoa">

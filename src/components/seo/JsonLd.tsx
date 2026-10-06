@@ -20,6 +20,7 @@ export function bakeryJsonLd(site: SiteInfo) {
     description: site.shortDescription,
     url: siteUrl,
     image: `${siteUrl}/opengraph-image`,
+    logo: `${siteUrl}/brand/logo-roza.png`,
     servesCuisine: ["Pâtisserie", "Cake design"],
     ...(site.email && { email: site.email }),
     ...(site.phone && { telephone: site.phone }),

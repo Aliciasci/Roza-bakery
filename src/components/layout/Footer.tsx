@@ -17,7 +17,7 @@ export async function Footer() {
       <div className="container-page pb-28 pt-16 md:pb-14 md:pt-24">
         <div className="grid gap-12 md:grid-cols-12">
           <div className="md:col-span-5">
-            <Logo tone="light" href={href("/")} label={t.nav.logoHome} />
+            <Logo size="footer" href={href("/")} label={t.nav.logoHome} />
             <p className="mt-6 max-w-sm font-serif text-[1.65rem] leading-snug text-cream/90">
               {t.footer.tagline}
             </p>

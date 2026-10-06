@@ -1,5 +1,6 @@
 import { ButtonLink } from "@/components/ui/Button";
 import { CakeImage } from "@/components/ui/CakeImage";
+import { LogoMark } from "@/components/layout/Logo";
 import { CalendarIcon, StoreIcon } from "@/components/ui/Icons";
 import { localizePath } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
@@ -18,7 +19,9 @@ function RotatingBadge({ text }: { text: string }) {
           <textPath href="#badge-circle">{text}</textPath>
         </text>
       </svg>
-      <span className="absolute inset-0 flex items-center justify-center font-serif text-2xl italic text-chocolate">R</span>
+      <span className="absolute inset-0 flex items-center justify-center">
+        <LogoMark size={56} className="h-12 w-12 md:h-14 md:w-14" />
+      </span>
     </div>
   );
 }

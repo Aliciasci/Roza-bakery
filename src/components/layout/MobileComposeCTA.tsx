@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useI18n } from "@/i18n/client";
+import { LogoMark } from "./Logo";
 
 /** Bouton flottant discret « Composer mon gâteau » (mobile & tablette). */
 export function MobileComposeCTA() {
@@ -37,8 +38,8 @@ export function MobileComposeCTA() {
         aria-hidden={!visible}
         className={`${visible ? "pointer-events-auto" : ""} inline-flex min-h-12 items-center gap-3 rounded-full bg-chocolate py-2.5 pl-2.5 pr-6 text-sm font-semibold text-cream shadow-[0_14px_30px_-10px_rgba(58,37,32,0.55)] transition-transform active:scale-[0.97]`}
       >
-        <span aria-hidden className="flex h-8 w-8 items-center justify-center rounded-full bg-rose font-serif text-base italic text-chocolate">
-          R
+        <span aria-hidden className="block h-8 w-8 shrink-0">
+          <LogoMark size={32} className="h-8 w-8" />
         </span>
         {t.common.composeCta}
       </Link>

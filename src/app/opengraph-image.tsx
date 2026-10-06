@@ -1,10 +1,16 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { ImageResponse } from "next/og";
 
 export const alt = "Roza Bakery — Votre gâteau, votre histoire.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OpengraphImage() {
+/** Image de partage (réseaux sociaux, messageries) avec le logo officiel. */
+export default async function OpengraphImage() {
+  const logo = await readFile(path.join(process.cwd(), "public", "brand", "logo-roza.png"));
+  const logoSrc = `data:image/png;base64,${logo.toString("base64")}`;
+
   return new ImageResponse(
     (
       <div
@@ -12,41 +18,34 @@ export default function OpengraphImage() {
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          padding: 80,
+          alignItems: "center",
+          gap: 72,
+          padding: "0 90px",
           background: "#fbf7f1",
           color: "#3a2520",
           fontFamily: "Georgia, serif",
+          position: "relative",
         }}
       >
-        <div style={{ display: "flex", alignItems: "baseline", gap: 18 }}>
-          <span style={{ fontSize: 54, fontStyle: "italic" }}>Roza</span>
-          <span style={{ fontSize: 18, letterSpacing: 10, textTransform: "uppercase" }}>Bakery</span>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <span style={{ fontSize: 96, lineHeight: 1 }}>Votre gâteau,</span>
-          <span style={{ fontSize: 96, lineHeight: 1.05, fontStyle: "italic", color: "#6a4f45" }}>votre histoire.</span>
-        </div>
-        <div style={{ display: "flex", gap: 28, fontSize: 24, color: "#6a4f45" }}>
-          <span>Pâtisserie artisanale</span>
-          <span>·</span>
-          <span>Gâteaux personnalisés</span>
-          <span>·</span>
-          <span>Cake design</span>
-        </div>
         <div
           style={{
             position: "absolute",
-            right: -120,
-            top: -120,
-            width: 520,
-            height: 520,
-            borderRadius: 520,
+            right: -140,
+            top: -160,
+            width: 560,
+            height: 560,
+            borderRadius: 560,
             background: "#ebcfc8",
-            opacity: 0.55,
+            opacity: 0.45,
           }}
         />
+        {/* eslint-disable-next-line @next/next/no-img-element -- rendu ImageResponse */}
+        <img src={logoSrc} width={420} height={420} alt="" style={{ flexShrink: 0 }} />
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <span style={{ fontSize: 84, lineHeight: 1 }}>Votre gâteau,</span>
+          <span style={{ fontSize: 84, lineHeight: 1.08, fontStyle: "italic", color: "#6a4f45" }}>votre histoire.</span>
+          <span style={{ marginTop: 36, fontSize: 26, color: "#6a4f45" }}>Pâtisserie artisanale · Gâteaux sur mesure</span>
+        </div>
       </div>
     ),
     size,
