@@ -48,6 +48,11 @@ export const optionSchema = z.object({
     .optional()
     .transform((v) => (v && v.length ? Array.from(new Set(v)) : undefined)),
   variantsLabel: optionalText(40),
+  variantColors: z
+    .array(z.string().regex(/^(#[0-9a-fA-F]{6})?$/, "Couleur invalide (#rrggbb)"))
+    .max(40)
+    .optional()
+    .transform((v) => (v?.some(Boolean) ? v : undefined)),
   kab: z
     .object({
       label: optionalText(80),

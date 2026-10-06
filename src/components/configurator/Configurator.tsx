@@ -26,7 +26,7 @@ export function Configurator() {
   const tc = t.configurator;
   const INFO_STEP = tc.infoStep;
   const ctx = useConfigurator();
-  const { steps, draft, customer, site, stepIndex, maxReached, totalSteps, hydrated, goToStep } = ctx;
+  const { steps, draft, customer, site, stepIndex, maxReached, totalSteps, hydrated, goToStep, reset } = ctx;
 
   const [stepError, setStepError] = useState<string | null>(null);
   const [customerErrors, setCustomerErrors] = useState<FieldErrors<keyof CustomerInfo>>({});
@@ -52,6 +52,13 @@ export function Configurator() {
     },
     [goToStep, stepIndex],
   );
+
+  const restart = useCallback(() => {
+    reset();
+    setCustomerErrors({});
+    setSheetOpen(false);
+    changeStep(0, "replace");
+  }, [reset, changeStep]);
 
   // Au chargement : reprend l'étape de l'URL (ex. lien « Modifier » du récapitulatif)
   useEffect(() => {
@@ -209,7 +216,7 @@ export function Configurator() {
 
           <aside className="hidden lg:col-span-4 lg:block" aria-label={tc.summaryAria}>
             <div className="sticky top-28 max-h-[calc(100dvh-8rem)] overflow-y-auto rounded-[2rem] bg-paper p-7 shadow-[0_30px_60px_-40px_rgba(58,37,32,0.45)] ring-1 ring-chocolate/5 no-scrollbar">
-              <ConfiguratorSummary onSelectStep={(i) => changeStep(i)} />
+              <ConfiguratorSummary onSelectStep={(i) => changeStep(i)} onRestart={restart} />
             </div>
           </aside>
         </div>
@@ -252,7 +259,7 @@ export function Configurator() {
         </div>
       </div>
 
-      <SummarySheet open={sheetOpen} onClose={() => setSheetOpen(false)} onSelectStep={(i) => changeStep(i)} />
+      <SummarySheet open={sheetOpen} onClose={() => setSheetOpen(false)} onSelectStep={(i) => changeStep(i)} onRestart={restart} />
     </>
   );
 }
@@ -261,10 +268,12 @@ function SummarySheet({
   open,
   onClose,
   onSelectStep,
+  onRestart,
 }: {
   open: boolean;
   onClose: () => void;
   onSelectStep: (index: number) => void;
+  onRestart: () => void;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const { t } = useI18n();
@@ -304,7 +313,7 @@ function SummarySheet({
           </button>
         </div>
         <div className="pb-6 pt-2">
-          <ConfiguratorSummary onNavigate={onClose} onSelectStep={onSelectStep} />
+          <ConfiguratorSummary onNavigate={onClose} onSelectStep={onSelectStep} onRestart={onRestart} />
         </div>
       </div>
     </div>

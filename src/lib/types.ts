@@ -70,6 +70,11 @@ export interface ConfigOption {
   variants?: string[];
   /** Intitulé du choix de saveur (défaut : « Saveur »). */
   variantsLabel?: string;
+  /**
+   * Couleur de chaque saveur pour l'aperçu du gâteau (#rrggbb), dans le même ordre que `variants`.
+   * Vide = couleur devinée d'après le nom de la saveur (chocolat, pistache, fraise…).
+   */
+  variantColors?: string[];
   kab?: OptionTranslation;
   /**
    * Libellés des saveurs à afficher (calculés selon la langue, jamais enregistrés).

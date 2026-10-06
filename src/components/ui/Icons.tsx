@@ -83,6 +83,13 @@ export const CloseIcon = (p: IconProps) => (
   </svg>
 );
 
+export const RestartIcon = (p: IconProps) => (
+  <svg {...base} strokeWidth={1.6} {...p}>
+    <path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" />
+    <path d="M4.5 4.5v3.8h3.8" />
+  </svg>
+);
+
 export const ImageIcon = (p: IconProps) => (
   <svg {...base} {...p}>
     <rect x="3.5" y="4.5" width="17" height="15" rx="2" />

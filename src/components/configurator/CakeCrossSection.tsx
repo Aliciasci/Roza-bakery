@@ -1,6 +1,6 @@
 import { useId } from "react";
 import { findOption } from "@/lib/composition";
-import { itemColor } from "@/lib/tones";
+import { flavorColor, itemColor, mixColors } from "@/lib/tones";
 import type { CompositionDraft, CompositionStep, CompositionStepId, Tone } from "@/lib/types";
 
 /** Un élément choisi : identifiant de l'option, couleur effective et teinte (qui détermine le rendu). */
@@ -28,7 +28,14 @@ export function computeCakeTones(steps: CompositionStep[], draft: CompositionDra
     return (draft.selections[id] ?? [])
       .map((optionId) => findOption(step, optionId))
       .filter((o) => o !== undefined)
-      .map((o) => ({ id: o.id, color: itemColor(o), tone: o.tone }));
+      .map((o) => {
+        // La saveur choisie colore l'élément : couleur exacte si réglée dans l'admin,
+        // sinon couleur devinée, fondue dans la teinte de l'option (une génoise chocolat reste une génoise)
+        const base = itemColor(o);
+        const flavor = flavorColor(o, draft.variants?.[o.id]);
+        const color = !flavor ? base : flavor.exact ? flavor.color : mixColors(base, flavor.color, id === "base" ? 0.75 : 0.85);
+        return { id: o.id, color, tone: o.tone };
+      });
   };
   return {
     base: items("base")[0],
@@ -46,15 +53,7 @@ export function computeCakeTones(steps: CompositionStep[], draft: CompositionDra
 /* Couleurs                                                                    */
 /* -------------------------------------------------------------------------- */
 
-const rgb = (hex: string) => {
-  const n = parseInt(hex.slice(1, 7), 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-};
-function mix(a: string, b: string, t: number) {
-  const x = rgb(a);
-  const y = rgb(b);
-  return `#${x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, "0")).join("")}`;
-}
+const mix = mixColors;
 const darken = (c: string, t: number) => mix(c, "#2a1712", t);
 const lighten = (c: string, t: number) => mix(c, "#ffffff", t);
 

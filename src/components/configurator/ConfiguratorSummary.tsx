@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { RestartIcon } from "@/components/ui/Icons";
 import { useI18n } from "@/i18n/client";
 import { resolveComposition } from "@/lib/composition";
 import { formatDateShort } from "@/lib/dates";
@@ -10,11 +12,21 @@ import { useConfigurator } from "./ConfiguratorProvider";
 export function ConfiguratorSummary({
   onNavigate,
   onSelectStep,
+  onRestart,
 }: {
   onNavigate?: () => void;
   onSelectStep?: (index: number) => void;
+  /** Efface la composition (après confirmation) et revient à la première étape. */
+  onRestart?: () => void;
 }) {
   const { steps, draft, customer, site, stepIndex, goToStep, maxReached, photos } = useConfigurator();
+  const [confirming, setConfirming] = useState(false);
+  const hasContent =
+    maxReached > 0 ||
+    photos.length > 0 ||
+    Object.values(draft.selections).some((ids) => ids?.length) ||
+    Object.values(draft.notes).some((n) => n?.trim()) ||
+    Object.values(customer).some((v) => typeof v === "string" && v.trim());
   const { t } = useI18n();
   const tc = t.configurator;
   const resolved = resolveComposition(steps, draft);
@@ -86,6 +98,44 @@ export function ConfiguratorSummary({
       <p className="mt-5 rounded-2xl bg-rose-soft/70 p-4 text-[0.8125rem] leading-relaxed text-chocolate">
         {t.common.priceNote}
       </p>
+
+      {onRestart && hasContent && (
+        <div className="mt-4 text-center" aria-live="polite">
+          {confirming ? (
+            <div className="rounded-2xl border border-chocolate/12 p-4">
+              <p className="text-sm text-chocolate">{tc.restartConfirm}</p>
+              <div className="mt-3 flex flex-wrap justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConfirming(false);
+                    onRestart();
+                  }}
+                  className="min-h-11 rounded-full bg-berry px-5 text-sm font-semibold text-white transition hover:bg-berry/90"
+                >
+                  {tc.restartYes}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirming(false)}
+                  className="min-h-11 rounded-full border border-chocolate/20 px-5 text-sm font-semibold text-chocolate transition hover:border-chocolate"
+                >
+                  {tc.restartNo}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirming(true)}
+              className="inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm text-cocoa underline-offset-4 transition hover:text-berry hover:underline"
+            >
+              <RestartIcon className="h-4 w-4" />
+              {tc.restart}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

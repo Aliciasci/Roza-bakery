@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { saveSteps } from "@/app/admin/actions";
 import { OptionSwatch } from "@/components/configurator/OptionVisual";
+import { guessFlavorColor, itemColor, toneColors } from "@/lib/tones";
 import type { CompositionStep, ConfigOption, OptionGroup } from "@/lib/types";
 import { PlusIcon } from "@/components/ui/Icons";
 import {
@@ -274,16 +275,64 @@ export function ConfiguratorEditor({ initial }: { initial: CompositionStep[] }) 
                               : "Laissez vide si l'option n'a pas de saveur à choisir."
                           }
                           values={option.variants ?? []}
-                          onChange={(variants) => setOption(gi, oi, { variants: variants.length ? variants : undefined })}
+                          onChange={(variants) => {
+                            // Chaque couleur reste attachée à sa saveur quand on en ajoute ou en retire
+                            const colors = variants.map((v) => option.variantColors?.[option.variants?.indexOf(v) ?? -1] ?? "");
+                            setOption(gi, oi, {
+                              variants: variants.length ? variants : undefined,
+                              variantColors: colors.some(Boolean) ? colors : undefined,
+                            });
+                          }}
                         />
                         {option.variants?.length ? (
-                          <TextInput
-                            label="Intitulé du choix"
-                            placeholder="Saveur"
-                            value={option.variantsLabel}
-                            onChange={(v) => setOption(gi, oi, { variantsLabel: v || undefined })}
-                            className="mt-3 max-w-xs"
-                          />
+                          <>
+                            <TextInput
+                              label="Intitulé du choix"
+                              placeholder="Saveur"
+                              value={option.variantsLabel}
+                              onChange={(v) => setOption(gi, oi, { variantsLabel: v || undefined })}
+                              className="mt-3 max-w-xs"
+                            />
+                            <div className="mt-4">
+                              <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-cocoa">Couleur de chaque saveur sur le gâteau</p>
+                              <p className="mb-2 text-xs text-cocoa-light">
+                                Devinée d&apos;après le nom (chocolat, pistache, fraise…). Cliquez sur une pastille pour la changer.
+                              </p>
+                              <div className="flex flex-wrap gap-x-4 gap-y-2">
+                                {option.variants.map((v, vi) => {
+                                  const set = option.variantColors?.[vi];
+                                  const current = set || guessFlavorColor(v) || itemColor(option);
+                                  return (
+                                    <div key={v} className="flex items-center gap-2 text-sm">
+                                      <ColorPicker
+                                        tone={option.tone}
+                                        color={current}
+                                        onChange={({ tone, color }) => {
+                                          const list = option.variants!.map((_, k) => option.variantColors?.[k] ?? "");
+                                          list[vi] = color ?? toneColors[tone];
+                                          setOption(gi, oi, { variantColors: list });
+                                        }}
+                                      />
+                                      <span>{v}</span>
+                                      {set && (
+                                        <button
+                                          type="button"
+                                          className="text-xs text-cocoa underline underline-offset-2 hover:text-berry"
+                                          onClick={() => {
+                                            const list = option.variants!.map((_, k) => option.variantColors?.[k] ?? "");
+                                            list[vi] = "";
+                                            setOption(gi, oi, { variantColors: list.some(Boolean) ? list : undefined });
+                                          }}
+                                        >
+                                          auto
+                                        </button>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </>
                         ) : null}
                         </>
                         )}
