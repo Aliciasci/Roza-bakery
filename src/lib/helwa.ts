@@ -12,9 +12,11 @@ export const minQuantity = (item: Pick<HelwaItem, "minQuantity">) => Math.max(1,
 /** Arrondi au centime (évite 0.1 + 0.2 = 0.30000000000000004). */
 const cents = (n: number) => Math.round(n * 100) / 100;
 
-/** Prix au format local : « 2,50 € ». */
+const priceFormat = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });
+
+/** Prix en dinars algériens : « 1 250 DA » (espace insécable avant « DA »). */
 export function formatPrice(value: number) {
-  return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(value);
+  return `${priceFormat.format(value)} DA`;
 }
 
 /** Quantité suivante / précédente : on saute directement de 0 au minimum (et inversement). */

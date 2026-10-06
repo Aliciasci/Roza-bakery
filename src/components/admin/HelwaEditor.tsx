@@ -24,7 +24,7 @@ import {
   type EditLang,
 } from "./ui";
 
-/** Prix en euros : accepte « 2,50 » comme « 2.50 ». Une saisie invalide est refusée à l'enregistrement. */
+/** Prix en dinars (DA) : accepte « 2,50 » comme « 2.50 ». Une saisie invalide est refusée à l'enregistrement. */
 function PriceInput({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   const [text, setText] = useState(Number.isFinite(value) ? String(value).replace(".", ",") : "");
   const invalid = !Number.isFinite(value);
@@ -32,12 +32,12 @@ function PriceInput({ value, onChange }: { value: number; onChange: (v: number) 
   // Après « Annuler » (valeur remise à zéro de l'extérieur), on réaffiche la valeur enregistrée
   const shown = invalid || parse(text) === value ? text : String(value).replace(".", ",");
   return (
-    <Field label="Prix à la pièce (€)" hint={invalid ? "Prix invalide" : undefined}>
+    <Field label="Prix à la pièce (DA)" hint={invalid ? "Prix invalide" : undefined}>
       {(id) => (
         <input
           id={id}
           inputMode="decimal"
-          placeholder="Ex. 1,50"
+          placeholder="Ex. 120"
           aria-invalid={invalid || undefined}
           className={`${inputClass} ${invalid ? "!border-berry" : ""}`}
           value={shown}
@@ -178,7 +178,7 @@ export function HelwaEditor({ initial }: { initial: HelwaCategory[] }) {
               <AddButton
                 onClick={() =>
                   setCategory(ci, {
-                    items: [...category.items, { id: makeId("piece"), name: "", price: 1, tone: "golden" }],
+                    items: [...category.items, { id: makeId("piece"), name: "", price: 100, tone: "golden" }],
                   })
                 }
               >

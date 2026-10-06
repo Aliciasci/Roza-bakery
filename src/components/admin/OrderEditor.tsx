@@ -49,7 +49,7 @@ export function OrderEditor({ order }: { order: Order }) {
       </div>
       <div className="mt-6 grid gap-4">
         <Field
-          label="Prix confirmé (€)"
+          label="Prix confirmé (DA)"
           hint={
             order.helwa
               ? `Total calculé à la commande : ${formatPrice(order.helwa.total)}. À renseigner seulement en cas de changement.`
@@ -60,7 +60,7 @@ export function OrderEditor({ order }: { order: Order }) {
             <input
               id={id}
               inputMode="decimal"
-              placeholder={order.helwa ? String(order.helwa.total).replace(".", ",") : "Ex. 85"}
+              placeholder={order.helwa ? String(order.helwa.total).replace(".", ",") : "Ex. 4500"}
               className={inputClass}
               aria-invalid={priceInvalid || undefined}
               value={v.confirmedPrice}

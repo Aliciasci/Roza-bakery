@@ -136,7 +136,7 @@ export const helwaSchema = z
             id,
             name: text(80).min(1, "Chaque pièce doit avoir un nom"),
             description: optionalText(200),
-            price: z.number({ error: "Prix invalide" }).min(0, "Prix invalide").max(1000, "Prix invalide"),
+            price: z.number({ error: "Prix invalide" }).min(0, "Prix invalide").max(100000, "Prix invalide"),
             minQuantity: z
               .number()
               .int("La quantité minimale doit être un nombre entier")

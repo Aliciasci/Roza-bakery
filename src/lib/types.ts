@@ -250,7 +250,7 @@ export interface HelwaItem {
   id: string;
   name: string;
   description?: string;
-  /** Prix d'une pièce, en euros. */
+  /** Prix d'une pièce, en dinars algériens (DA). */
   price: number;
   /** Quantité minimale commandable (ex. 6 cookies). Défaut : 1. */
   minQuantity?: number;
