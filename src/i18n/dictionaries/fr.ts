@@ -391,7 +391,6 @@ export const fr = {
     firstNameLong: "Prénom trop long.",
     lastName: "Merci d'indiquer votre nom.",
     lastNameLong: "Nom trop long.",
-    email: "Merci d'indiquer votre adresse email.",
     emailInvalid: "Cette adresse email ne semble pas valide.",
     phone: "Merci d'indiquer votre numéro de téléphone.",
     phoneInvalid: "Ce numéro de téléphone ne semble pas valide.",

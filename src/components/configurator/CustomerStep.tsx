@@ -121,7 +121,7 @@ export function CustomerFields({
           <Field id="f-lastName" label={tc.lastName} error={errors.lastName}>
             <input {...input("lastName", { autoComplete: "family-name", maxLength: LIMITS.name })} />
           </Field>
-          <Field id="f-email" label={tc.email} error={errors.email}>
+          <Field id="f-email" label={`${tc.email} ${t.configurator.optionalParen}`} error={errors.email}>
             <input {...input("email", { type: "email", autoComplete: "email", inputMode: "email", maxLength: LIMITS.email })} />
           </Field>
           <Field id="f-phone" label={tc.phone} error={errors.phone}>

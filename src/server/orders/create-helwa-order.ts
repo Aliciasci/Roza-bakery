@@ -81,7 +81,7 @@ export async function createHelwaOrder(payload: HelwaPayload): Promise<Order> {
   const inbox = bakeryInbox();
   if (inbox || !mailer.configured) {
     try {
-      await mailer.send({ to: inbox ?? "roza-bakery@localhost", replyTo: customer.email, ...helwaBakeryEmail(order, site) });
+      await mailer.send({ to: inbox ?? "roza-bakery@localhost", replyTo: customer.email || undefined, ...helwaBakeryEmail(order, site) });
       bakeryNotified = mailer.configured;
     } catch (err) {
       console.error("[helwa] notification Roza Bakery impossible :", err);
@@ -92,13 +92,15 @@ export async function createHelwaOrder(payload: HelwaPayload): Promise<Order> {
   if (!stored && !bakeryNotified) throw new Error("La commande n'a pu être ni enregistrée ni transmise.");
 
   // Accusé de réception dans la langue de la cliente (noms des pièces traduits, non bloquant)
-  try {
-    const [localCatalog, localSite] =
-      locale === "fr" ? [catalog, site] : await Promise.all([getHelwa(locale), getSiteInfo(locale)]);
-    const localLines = cartLines(localCatalog, payload.cart);
-    await mailer.send({ to: customer.email, ...helwaCustomerEmail(order, localSite, localLines, locale) });
-  } catch (err) {
-    console.error("[helwa] email client impossible :", err);
+  if (customer.email) {
+    try {
+      const [localCatalog, localSite] =
+        locale === "fr" ? [catalog, site] : await Promise.all([getHelwa(locale), getSiteInfo(locale)]);
+      const localLines = cartLines(localCatalog, payload.cart);
+      await mailer.send({ to: customer.email, ...helwaCustomerEmail(order, localSite, localLines, locale) });
+    } catch (err) {
+      console.error("[helwa] email client impossible :", err);
+    }
   }
 
   return order;

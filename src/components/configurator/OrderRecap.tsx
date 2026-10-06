@@ -129,9 +129,11 @@ export function OrderRecap({
               <Row label={t.name} editHref={edit(composition.length + 1)} editLabel={t.modify}>
                 {customer.firstName} {customer.lastName}
               </Row>
-              <Row label={t.email}>
-                <span className="break-all font-sans text-base">{customer.email}</span>
-              </Row>
+              {customer.email.trim() && (
+                <Row label={t.email}>
+                  <span className="break-all font-sans text-base">{customer.email}</span>
+                </Row>
+              )}
               <Row label={t.phone}>
                 <span className="font-sans text-base">{customer.phone}</span>
               </Row>

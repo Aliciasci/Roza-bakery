@@ -407,7 +407,6 @@ export const kab: Dictionary = {
     firstNameLong: "Isem ɣezzif aṭas.",
     lastName: "Ttxil, ini-d isem n twacult.",
     lastNameLong: "Isem n twacult ɣezzif aṭas.",
-    email: "Ttxil, ini-d tansa-k n yimayl.",
     emailInvalid: "Tansa-a n yimayl tettban-d ur tṣeḥḥa ara.",
     phone: "Ttxil, ini-d uṭṭun-ik n tiliɣri.",
     phoneInvalid: "Uṭṭun-a n tiliɣri yettban-d ur yṣeḥḥa ara.",

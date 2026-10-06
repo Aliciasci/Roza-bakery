@@ -4,6 +4,7 @@ import { useState } from "react";
 import { saveSteps } from "@/app/admin/actions";
 import { OptionSwatch } from "@/components/configurator/OptionVisual";
 import type { CompositionStep, ConfigOption, OptionGroup } from "@/lib/types";
+import { PlusIcon } from "@/components/ui/Icons";
 import {
   AddButton,
   inputClass,
@@ -43,6 +44,32 @@ export function ConfiguratorEditor({ initial }: { initial: CompositionStep[] }) 
 
   const optionCount = step.groups.reduce((n, g) => n + g.options.length, 0);
 
+  const addStep = () => {
+    const id = `etape-${rand()}`;
+    editor.setValue([
+      ...steps,
+      {
+        id,
+        name: "Nouvelle étape",
+        title: "Nouvelle étape",
+        subtitle: "",
+        mode: "single",
+        required: false,
+        summaryLabel: "Nouvelle étape",
+        groups: [{ id: `${id}-groupe`, options: [] }],
+      },
+    ]);
+    setCurrent(steps.length);
+  };
+  const moveStep = (delta: number) => {
+    editor.setValue(move(steps, current, delta));
+    setCurrent(Math.min(Math.max(current + delta, 0), steps.length - 1));
+  };
+  const deleteStep = () => {
+    editor.setValue(steps.filter((_, i) => i !== current));
+    setCurrent(Math.max(0, Math.min(current, steps.length - 2)));
+  };
+
   return (
     <>
       <PageTitle
@@ -75,12 +102,32 @@ export function ConfiguratorEditor({ initial }: { initial: CompositionStep[] }) 
             {s.name}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={addStep}
+          className="flex min-h-11 shrink-0 items-center gap-2 rounded-full border border-dashed border-chocolate/25 px-4 text-sm font-semibold transition hover:border-chocolate hover:bg-paper"
+        >
+          <PlusIcon className="h-4 w-4" />
+          Ajouter une étape
+        </button>
       </div>
 
       <div className="space-y-6" role="tabpanel">
         {/* Réglages de l'étape */}
         <Card>
-          <h2 className="font-serif text-2xl">Textes et règles de l&apos;étape</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="font-serif text-2xl">Textes et règles de l&apos;étape</h2>
+            {steps.length > 1 && (
+              <RowActions
+                key={step.id}
+                index={current}
+                length={steps.length}
+                label={step.name || `Étape ${current + 1}`}
+                onMove={moveStep}
+                onDelete={deleteStep}
+              />
+            )}
+          </div>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             {(
               [
@@ -292,7 +339,7 @@ export function ConfiguratorEditor({ initial }: { initial: CompositionStep[] }) 
 
         <p className="text-xs text-cocoa-light">
           {optionCount} option{optionCount > 1 ? "s" : ""} dans cette étape. Une option « non disponible » reste enregistrée mais n&apos;apparaît
-          plus sur le site. Supprimer une option ne modifie pas les commandes déjà reçues.
+          plus sur le site. Supprimer une option ou une étape ne modifie pas les commandes déjà reçues.
         </p>
       </div>
 

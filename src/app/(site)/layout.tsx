@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const { t } = await getI18n();
   return (
-    <>
+    <div className="bg-flowers flex flex-1 flex-col">
       <a
         href="#contenu"
         className="sr-only rounded-full bg-chocolate px-5 py-3 text-sm text-cream focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[60]"
@@ -22,6 +22,6 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       </main>
       <Footer />
       <MobileComposeCTA />
-    </>
+    </div>
   );
 }

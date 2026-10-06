@@ -89,15 +89,8 @@ export interface OptionGroup {
   kab?: { label?: string; description?: string };
 }
 
-export type CompositionStepId =
-  | "base"
-  | "creme"
-  | "inserts"
-  | "croustillant"
-  | "fruits"
-  | "supplements"
-  | "exterieur"
-  | "decoration";
+/** Identifiant d'étape (« base », « creme »… ou généré pour une étape ajoutée dans l'admin). */
+export type CompositionStepId = string;
 
 export interface CompositionStep {
   id: CompositionStepId;

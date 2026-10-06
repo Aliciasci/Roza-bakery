@@ -1,10 +1,11 @@
 import { z } from "zod";
 import { LIMITS } from "@/lib/validation";
 
-const stepIds = ["base", "creme", "inserts", "croustillant", "fruits", "supplements", "exterieur", "decoration"] as const;
+// Les étapes sont éditables dans l'admin : les identifiants inconnus sont rejetés ensuite par validateComposition.
+const stepId = z.string().max(80);
 
-const selections = z.partialRecord(z.enum(stepIds), z.array(z.string().max(80)).max(20));
-const notes = z.partialRecord(z.enum(stepIds), z.string().max(LIMITS.notes));
+const selections = z.record(stepId, z.array(z.string().max(80)).max(20));
+const notes = z.record(stepId, z.string().max(LIMITS.notes));
 
 /** Forme attendue du JSON envoyé par le configurateur (les règles métier sont vérifiées ensuite). */
 export const orderPayloadSchema = z.object({

@@ -39,8 +39,8 @@ export function validateCustomer(
   if (!customer.lastName.trim()) errors.lastName = m.lastName;
   else if (customer.lastName.length > LIMITS.name) errors.lastName = m.lastNameLong;
 
-  if (!customer.email.trim()) errors.email = m.email;
-  else if (!EMAIL_RE.test(customer.email.trim()) || customer.email.length > LIMITS.email)
+  // Email facultatif : vérifié seulement s'il est renseigné
+  if (customer.email.trim() && (!EMAIL_RE.test(customer.email.trim()) || customer.email.length > LIMITS.email))
     errors.email = m.emailInvalid;
 
   const phone = cleanPhone(customer.phone);

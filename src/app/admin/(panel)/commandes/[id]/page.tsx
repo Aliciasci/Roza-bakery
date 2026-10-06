@@ -144,12 +144,14 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           <Card>
             <h2 className="font-serif text-2xl">Contact</h2>
             <div className="mt-4 flex flex-col gap-2">
+              {c.email && (
               <a
                 href={`mailto:${c.email}?subject=${encodeURIComponent(`${order.kind === "helwa" ? "Votre commande Helwa" : "Votre gâteau"} Roza Bakery (${order.reference})`)}`}
                 className="flex min-h-11 items-center justify-between rounded-xl bg-ivory px-4 text-sm hover:bg-sand"
               >
                 <span className="truncate">{c.email}</span> <span aria-hidden>✉</span>
               </a>
+              )}
               <a href={`tel:${c.phone.replace(/[^\d+]/g, "")}`} className="flex min-h-11 items-center justify-between rounded-xl bg-ivory px-4 text-sm hover:bg-sand">
                 {c.phone} <span aria-hidden>☎</span>
               </a>

@@ -86,7 +86,7 @@ export function bakeryEmail(order: Order, site: SiteInfo) {
      <h2 style="margin:28px 0 8px;font:400 22px Georgia,serif;color:#3a2520">Cliente / client</h2>
      <p style="margin:0;font:15px/1.7 Arial,sans-serif;color:#3a2520">
        ${esc(c.firstName)} ${esc(c.lastName)}<br>
-       <a href="mailto:${esc(c.email)}" style="color:#9e2f45">${esc(c.email)}</a><br>
+       ${c.email ? `<a href="mailto:${esc(c.email)}" style="color:#9e2f45">${esc(c.email)}</a><br>` : ""}
        <a href="tel:${esc(c.phone)}" style="color:#9e2f45">${esc(c.phone)}</a>
      </p>
      ${c.message ? `<p style="margin:16px 0 0;padding:14px;border-radius:12px;background:#f4ede3;font:14px/1.6 Arial,sans-serif;color:#3a2520;white-space:pre-wrap">${esc(c.message)}</p>` : ""}
@@ -95,7 +95,7 @@ export function bakeryEmail(order: Order, site: SiteInfo) {
   );
   const text = [
     `Nouvelle demande ${order.reference}`,
-    `${c.firstName} ${c.lastName} — ${c.email} — ${c.phone}`,
+    [`${c.firstName} ${c.lastName}`, c.email, c.phone].filter(Boolean).join(" — "),
     `Retrait : ${formatDateLong(c.pickupDate)} (${c.pickupSlot}) — ${c.servings} personnes`,
     "",
     ...order.composition.filter((s) => s.items.length || s.notes).map((s) => `${s.label} : ${s.items.join(", ")}${s.notes ? ` (${s.notes})` : ""}`),
@@ -168,7 +168,7 @@ export function helwaBakeryEmail(order: Order, site: SiteInfo) {
      <h2 style="margin:28px 0 8px;font:400 22px Georgia,serif;color:#3a2520">Cliente / client</h2>
      <p style="margin:0;font:15px/1.7 Arial,sans-serif;color:#3a2520">
        ${esc(c.firstName)} ${esc(c.lastName)}<br>
-       <a href="mailto:${esc(c.email)}" style="color:#9e2f45">${esc(c.email)}</a><br>
+       ${c.email ? `<a href="mailto:${esc(c.email)}" style="color:#9e2f45">${esc(c.email)}</a><br>` : ""}
        <a href="tel:${esc(c.phone)}" style="color:#9e2f45">${esc(c.phone)}</a>
      </p>
      ${c.message ? `<p style="margin:16px 0 0;padding:14px;border-radius:12px;background:#f4ede3;font:14px/1.6 Arial,sans-serif;color:#3a2520;white-space:pre-wrap">${esc(c.message)}</p>` : ""}
@@ -176,7 +176,7 @@ export function helwaBakeryEmail(order: Order, site: SiteInfo) {
   );
   const text = [
     `Nouvelle commande Helwa ${order.reference}`,
-    `${c.firstName} ${c.lastName} — ${c.email} — ${c.phone}`,
+    [`${c.firstName} ${c.lastName}`, c.email, c.phone].filter(Boolean).join(" — "),
     `Retrait : ${formatDateLong(c.pickupDate)} (${c.pickupSlot})`,
     "",
     ...lines.map((l) => `${l.quantity} × ${l.name} (${formatPrice(l.unitPrice)}) : ${formatPrice(l.total)}`),

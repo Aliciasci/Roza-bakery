@@ -68,7 +68,7 @@ export const groupSchema = z.object({
 });
 
 export const stepSchema = z.object({
-  id: z.enum(["base", "creme", "inserts", "croustillant", "fruits", "supplements", "exterieur", "decoration"]),
+  id,
   name: text(80).min(1),
   title: text(120).min(1),
   subtitle: text(300),
@@ -84,8 +84,14 @@ export const stepSchema = z.object({
 
 export const stepsSchema = z
   .array(stepSchema)
-  .length(8)
+  .min(1, "Le configurateur doit avoir au moins une étape")
+  .max(20)
   .superRefine((steps, ctx) => {
+    const stepIds = new Set<string>();
+    for (const s of steps) {
+      if (stepIds.has(s.id)) ctx.addIssue({ code: "custom", message: `Identifiant d'étape en double : ${s.id}` });
+      stepIds.add(s.id);
+    }
     const seen = new Set<string>();
     for (const s of steps)
       for (const g of s.groups)

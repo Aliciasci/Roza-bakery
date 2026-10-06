@@ -38,11 +38,13 @@ export async function createOrder(payload: OrderPayload, files: UploadedFile[]):
 
   if (files.length > site.maxInspirationPhotos) throw new OrderValidationError(t.photos.max(site.maxInspirationPhotos));
 
+  // Ne garder que les étapes existantes (les identifiants d'étape sont libres depuis l'admin)
+  const known = <T,>(record: Record<string, T>) => Object.fromEntries(steps.filter((s) => s.id in record).map((s) => [s.id, record[s.id]]));
   const draft = {
-    selections: payload.selections,
+    selections: known(payload.selections),
     customValues: payload.customValues,
     variants: payload.variants,
-    notes: payload.notes,
+    notes: known(payload.notes),
   };
   const order: Order = {
     id: randomUUID(),
@@ -74,7 +76,7 @@ export async function createOrder(payload: OrderPayload, files: UploadedFile[]):
       const mail = bakeryEmail(order, site);
       await mailer.send({
         to: inbox ?? "roza-bakery@localhost",
-        replyTo: order.customer.email,
+        replyTo: order.customer.email || undefined,
         ...mail,
         attachments: files.map((f) => ({ filename: f.name, content: f.data })),
       });
@@ -89,15 +91,17 @@ export async function createOrder(payload: OrderPayload, files: UploadedFile[]):
     throw new Error("La demande n'a pu être ni enregistrée ni transmise.");
   }
 
-  // Accusé de réception à la cliente (non bloquant)
-  try {
-    // …et dans la langue de la cliente pour son accusé de réception
-    const [localSteps, localSite] =
-      locale === "fr" ? [steps, site] : await Promise.all([getCompositionSteps(locale), getSiteInfo(locale)]);
-    const localComposition = resolveComposition(localSteps, draft);
-    await mailer.send({ to: order.customer.email, ...customerEmail(order, localSite, localComposition, locale) });
-  } catch (err) {
-    console.error("[commande] email client impossible :", err);
+  // Accusé de réception à la cliente (non bloquant, seulement si elle a donné son email)
+  if (order.customer.email) {
+    try {
+      // …et dans la langue de la cliente pour son accusé de réception
+      const [localSteps, localSite] =
+        locale === "fr" ? [steps, site] : await Promise.all([getCompositionSteps(locale), getSiteInfo(locale)]);
+      const localComposition = resolveComposition(localSteps, draft);
+      await mailer.send({ to: order.customer.email, ...customerEmail(order, localSite, localComposition, locale) });
+    } catch (err) {
+      console.error("[commande] email client impossible :", err);
+    }
   }
 
   return order;
